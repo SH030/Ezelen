@@ -2,26 +2,60 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8" />
-  <title>Puntentelling Wie is de Ezel met Historie en Verwijderen</title>
+  <title>Puntentelling Wie is de Ezel - Spelers verwijderen uit lijst en Enter-score</title>
   <style>
     body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 30px; }
     h2, h3 { margin-bottom: 0; }
-    #players { margin-bottom: 30px; }
-    table { border-collapse: collapse; margin-top: 20px; background: #fff; }
+    #players { margin-bottom: 20px; }
+    #playerList span {
+      display: inline-block;
+      margin-right: 10px;
+      padding: 4px 8px;
+      background: #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      user-select: none;
+    }
+    #playerList span:hover {
+      background: #bbb;
+    }
+    table { border-collapse: collapse; margin-top: 15px; background: #fff; }
     th, td { padding: 8px 15px; border: 1px solid #bbb; }
     th { background: #e3e3e3; }
     input[type="number"] { width: 60px; margin-left: 8px; margin-right: 8px; }
     .btn { cursor: pointer; padding: 3px 8px; }
-    .remove-player-btn, .remove-history-btn { color: #b33; background: none; border: none; font-size: 16px; cursor: pointer; }
-    .history-container { margin-top: 10px; font-size: 0.9em; font-style: italic; }
-    .history-item { margin-bottom: 4px; }
+    .remove-history-btn { color: #b33; background: none; border: none; font-size: 16px; cursor: pointer; }
+    /* Modaal styles */
+    #modalBackground {
+      display: none;
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.5);
+      justify-content: center; align-items: center;
+      z-index: 1000;
+    }
+    #modal {
+      background: white;
+      padding: 20px;
+      max-width: 400px;
+      max-height: 70vh;
+      overflow-y: auto;
+      border-radius: 6px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    #modal h3 { margin-top: 0; }
+    .history-item {
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
   </style>
 </head>
 <body>
-  <h2>Puntentelling: Wie is de Ezel met Historie en Verwijderen</h2>
+  <h2>Puntentelling: Wie is de Ezel</h2>
 
   <div id="players">
-    <h3>Spelers toevoegen</h3>
+    <h3>Spelers (klik op naam voor verwijderen)</h3>
     <input type="text" id="playerNameInput" placeholder="Naam speler" />
     <button onclick="addPlayer()">Toevoegen</button>
     <p id="playerError" style="color: red; margin:6px 0 0 0;"></p>
@@ -37,14 +71,23 @@
         <th>Nieuwe punten</th>
         <th>Toevoegen</th>
         <th>Historie</th>
-        <th>Verwijderen</th>
       </tr>
     </thead>
     <tbody id="scoreBody"></tbody>
   </table>
 
+  <!-- Modal voor historie -->
+  <div id="modalBackground" onclick="closeModal(event)">
+    <div id="modal" onclick="event.stopPropagation()">
+      <h3>Historische punten voor <span id="modalPlayerName"></span></h3>
+      <div id="modalHistoryContainer"></div>
+      <button onclick="closeModal()">Sluiten</button>
+    </div>
+  </div>
+
   <script>
     let players = [];
+    let modalOpenForIndex = null;
 
     window.onload = function () {
       const saved = localStorage.getItem('ezelplayers');
@@ -81,6 +124,27 @@
       renderTable();
     }
 
+    function removePlayerByName(index) {
+      if (confirm(`Weet je zeker dat je speler "${players[index].name}" wilt verwijderen?`)) {
+        players.splice(index, 1);
+        savePlayers();
+        renderPlayers();
+        renderTable();
+        closeModal();
+      }
+    }
+
+    function renderPlayers() {
+      const div = document.getElementById('playerList');
+      if (players.length === 0) {
+        div.innerHTML = '<em>Geen spelers toegevoegd.</em>';
+      } else {
+        div.innerHTML = players.map((p, i) =>
+          `<span title="Klik om te verwijderen" onclick="removePlayerByName(${i})">${p.name}</span>`
+        ).join('');
+      }
+    }
+
     function addPoints(index) {
       const input = document.getElementById('pointsInput-' + index);
       let add = parseInt(input.value, 10);
@@ -95,23 +159,43 @@
       renderTable();
     }
 
-    function removePlayer(index) {
-      if (index >= 0 && index < players.length) {
-        players.splice(index, 1);
-        savePlayers();
-        renderPlayers();
-        renderTable();
+    function addPointsOnEnter(event, index) {
+      if (event.key === 'Enter') {
+        addPoints(index);
       }
     }
 
-    function toggleHistory(index) {
-      const historyDiv = document.getElementById('history-' + index);
-      if (!historyDiv) return;
-      if (historyDiv.style.display === 'none' || historyDiv.style.display === '') {
-        historyDiv.style.display = 'block';
+    function openHistoryModal(index) {
+      modalOpenForIndex = index;
+      const modal = document.getElementById('modalBackground');
+      const modalName = document.getElementById('modalPlayerName');
+      const modalHistoryContainer = document.getElementById('modalHistoryContainer');
+
+      modalName.textContent = players[index].name;
+      modalHistoryContainer.innerHTML = '';
+
+      if (players[index].history.length === 0) {
+        modalHistoryContainer.innerHTML = '<em>Geen historie</em>';
       } else {
-        historyDiv.style.display = 'none';
+        players[index].history.forEach((pt, hIndex) => {
+          const div = document.createElement('div');
+          div.className = 'history-item';
+          div.innerHTML = `
+            <span>${pt} punten</span>
+            <button class="remove-history-btn" title="Verwijder deze punt" onclick="removeHistoryPoint(${index}, ${hIndex})">✖</button>
+          `;
+          modalHistoryContainer.appendChild(div);
+        });
       }
+      modal.style.display = 'flex';
+    }
+
+    function closeModal(event) {
+      if (event) {
+        if (event.target.id !== 'modalBackground') return; // sluit alleen als buiten modal geklikt wordt
+      }
+      document.getElementById('modalBackground').style.display = 'none';
+      modalOpenForIndex = null;
     }
 
     function removeHistoryPoint(playerIndex, historyIndex) {
@@ -121,15 +205,9 @@
         if (players[playerIndex].points < 0) players[playerIndex].points = 0;
         savePlayers();
         renderTable();
-      }
-    }
-
-    function renderPlayers() {
-      const div = document.getElementById('playerList');
-      if (players.length === 0) {
-        div.innerHTML = '<em>Geen spelers toegevoegd.</em>';
-      } else {
-        div.innerHTML = 'Spelers: ' + players.map(p => p.name).join(', ');
+        if (modalOpenForIndex === playerIndex) {
+          openHistoryModal(playerIndex); // modal vernieuwen
+        }
       }
     }
 
@@ -138,30 +216,13 @@
       tbody.innerHTML = '';
       players.forEach((player, pIndex) => {
         const row = document.createElement('tr');
-
-        let historyHtml = '';
-        if (player.history.length > 0) {
-          historyHtml = player.history.map((pt, hIndex) =>
-            `<div class="history-item">${pt} punten 
-              <button class="remove-history-btn" title="Verwijder deze punt" onclick="removeHistoryPoint(${pIndex}, ${hIndex})">✖</button>
-            </div>`
-          ).join('');
-        } else {
-          historyHtml = '<em>Geen historie</em>';
-        }
-
         row.innerHTML = `
           <td>${player.name}</td>
           <td>${player.points}</td>
-          <td><input type="number" id="pointsInput-${pIndex}" min="1" placeholder="0"></td>
+          <td><input type="number" id="pointsInput-${pIndex}" min="1" placeholder="0" 
+            onkeydown="addPointsOnEnter(event, ${pIndex})"></td>
           <td><button class="btn" onclick="addPoints(${pIndex})">➕</button></td>
-          <td>
-            <button class="btn" onclick="toggleHistory(${pIndex})">Bekijk</button>
-            <div id="history-${pIndex}" class="history-container" style="display:none;">
-              ${historyHtml}
-            </div>
-          </td>
-          <td><button class="remove-player-btn" onclick="removePlayer(${pIndex})" title="Speler verwijderen">✖</button></td>
+          <td><button class="btn" onclick="openHistoryModal(${pIndex})">Bekijk</button></td>
         `;
         tbody.appendChild(row);
       });
