@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8" />
-  <title>Puntentelling Wie is de Ezel - Winnaar met Confetti</title>
+  <title>Puntentelling Wie is de Ezel - Met Floating Knop</title>
   <style>
     body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 30px; }
     h2, h3 { margin-bottom: 0; }
@@ -56,7 +56,26 @@
       font-size: 18px;
       cursor: pointer;
     }
-    /* Modaal styles */
+    /* Floating knop linksrecht onderaan */
+    #floatButton {
+      position: fixed;
+      right: 20px; /* Aanpassen voor positie */
+      bottom: 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      width: 60px;
+      height: 60px;
+      font-size: 2em;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    /* Modal styling */
     #modalBackground {
       display: none;
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -81,6 +100,7 @@
       justify-content: space-between;
       align-items: center;
     }
+    /* Winner overlay & confetti - niet zichtbaar standaard */
     #winnerOverlay {
       display: none;
       position: fixed;
@@ -105,16 +125,12 @@
       cursor: pointer;
       background-color: #4caf50;
       color: white;
-      transition: background-color 0.3s;
-    }
-    #winnerOverlay button:hover {
-      background-color: #45a049;
     }
   </style>
 </head>
 <body>
   <h2>Puntentelling: Wie is de Ezel</h2>
-
+  <!-- Spelers invoer en lijst -->
   <div id="players">
     <h3>Spelers (klik op naam voor verwijderen)</h3>
     <input type="text" id="playerNameInput" placeholder="Naam speler" />
@@ -123,6 +139,7 @@
     <div id="playerList"></div>
   </div>
 
+  <!-- Score tabel -->
   <h3>Scoreoverzicht</h3>
   <table id="scoreTable">
     <thead>
@@ -137,9 +154,15 @@
     <tbody id="scoreBody"></tbody>
   </table>
 
-  <button class="btn" onclick="showWinner()">Winnaar!</button>
+  <!-- Knop voor winnaar & confetti -->
+  <button id="winnerBtn" class="btn" onclick="showWinner()">Winnaar!</button>
 
-  <!-- Modal voor historie -->
+  <!-- Floating knop rechts onderin -->
+  <button id="floatButton" onclick="toggleFullscreen()" title="Fullscreen/Exit">
+    ⛶
+  </button>
+
+  <!-- Modal historie -->
   <div id="modalBackground" onclick="closeModal(event)">
     <div id="modal" onclick="event.stopPropagation()">
       <h3>Historische punten voor <span id="modalPlayerName"></span></h3>
@@ -148,17 +171,20 @@
     </div>
   </div>
 
-  <!-- Fullscreen winnaar -->
+  <!-- Winnaar fullscreen + confetti -->
   <div id="winnerOverlay">
     <div id="winnerText"></div>
     <button onclick="closeWinner()">Sluiten</button>
   </div>
 
+  <!-- Confetti library -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
   <script>
     let players = [];
     let modalOpenForIndex = null;
 
+    // Init
     window.onload = function () {
       const saved = localStorage.getItem('ezelplayers');
       if (saved) {
@@ -168,32 +194,35 @@
       renderTable();
     };
 
+    // Save
     function savePlayers() {
       localStorage.setItem('ezelplayers', JSON.stringify(players));
     }
 
+    // Speler toevoegen
     function addPlayer() {
-      const nameInput = document.getElementById('playerNameInput');
-      const playerError = document.getElementById('playerError');
-      const name = nameInput.value.trim();
+      const input = document.getElementById('playerNameInput');
+      const errorMsg = document.getElementById('playerError');
+      const name = input.value.trim();
 
       if (!name) {
-        playerError.textContent = 'Naam mag niet leeg zijn.';
+        errorMsg.textContent = 'Naam mag niet leeg zijn.';
         return;
       }
       if (players.some(p => p.name.toLowerCase() === name.toLowerCase())) {
-        playerError.textContent = 'Naam moet uniek zijn.';
+        errorMsg.textContent = 'Naam moet uniek zijn.';
         return;
       }
 
-      playerError.textContent = '';
+      errorMsg.textContent = '';
       players.push({ name: name, points: 0, history: [] });
-      nameInput.value = '';
+      input.value = '';
       savePlayers();
       renderPlayers();
       renderTable();
     }
 
+    // Verwijder speler via klik op naam
     function removePlayerByName(index) {
       if (confirm(`Weet je zeker dat je speler "${players[index].name}" wilt verwijderen?`)) {
         players.splice(index, 1);
@@ -204,17 +233,19 @@
       }
     }
 
+    // Spelers lijst tonen (boven)
     function renderPlayers() {
       const div = document.getElementById('playerList');
       if (players.length === 0) {
         div.innerHTML = '<em>Geen spelers toegevoegd.</em>';
       } else {
-        div.innerHTML = players.map((p, i) =>
+        div.innerHTML = players.map((p,i) =>
           `<span title="Klik om te verwijderen" onclick="removePlayerByName(${i})">${p.name}</span>`
         ).join('');
       }
     }
 
+    // Punt toevoegen
     function addPoints(index) {
       const input = document.getElementById('pointsInput-' + index);
       let add = parseInt(input.value, 10);
@@ -229,128 +260,121 @@
       renderTable();
     }
 
+    // Punt toevoegen met ENTER
     function addPointsOnEnter(event, index) {
       if (event.key === 'Enter') {
         addPoints(index);
       }
     }
 
+    // Historische punten modal openen
     function openHistoryModal(index) {
       modalOpenForIndex = index;
-      const modal = document.getElementById('modalBackground');
+      document.getElementById('modal').innerHTML = `
+        <h3>Historische punten voor <span id="modalPlayerName"></span></h3>
+        <div id="modalHistoryContainer"></div>
+        <button class="btn" onclick="closeModal()">Sluiten</button>`;
       const modalName = document.getElementById('modalPlayerName');
-      const modalHistoryContainer = document.getElementById('modalHistoryContainer');
+      const container = document.getElementById('modalHistoryContainer');
 
       modalName.textContent = players[index].name;
-      modalHistoryContainer.innerHTML = '';
+      container.innerHTML = '';
 
       if (players[index].history.length === 0) {
-        modalHistoryContainer.innerHTML = '<em>Geen historie</em>';
+        container.innerHTML = '<em>Geen historie</em>';
       } else {
-        players[index].history.forEach((pt, hIndex) => {
+        players[index].history.forEach((pt, hIdx) => {
           const div = document.createElement('div');
           div.className = 'history-item';
           div.innerHTML = `
             <span>${pt} punten</span>
-            <button class="remove-history-btn" title="Verwijder deze punt" onclick="removeHistoryPoint(${index}, ${hIndex})">✖</button>
-          `;
-          modalHistoryContainer.appendChild(div);
+            <button class="remove-history-btn" title="Verwijder deze punt" onclick="removeHistoryPoint(${index}, ${hIdx})">✖</button>`;
+          container.appendChild(div);
         });
       }
-      modal.style.display = 'flex';
+
+      document.getElementById('modalBackground').style.display = 'flex';
     }
 
-    function closeModal(event) {
-      if (event) {
-        if (event.target.id !== 'modalBackground') return;
-      }
+    // Modal sluiten
+    function closeModal(e) {
+      if (e && e.target.id !== 'modalBackground') return;
       document.getElementById('modalBackground').style.display = 'none';
       modalOpenForIndex = null;
     }
 
-    function removeHistoryPoint(playerIndex, historyIndex) {
+    // Punt uit historie verwijderen
+    function removeHistoryPoint(pIdx, hIdx) {
       if (confirm('Weet je zeker dat je deze puntentoevoeging wilt verwijderen?')) {
-        const removedPoints = players[playerIndex].history.splice(historyIndex, 1)[0];
-        players[playerIndex].points -= removedPoints;
-        if (players[playerIndex].points < 0) players[playerIndex].points = 0;
+        const pts = players[pIdx].history.splice(hIdx,1)[0];
+        players[pIdx].points -= pts;
+        if (players[pIdx].points < 0) players[pIdx].points = 0;
         savePlayers();
         renderTable();
-        if (modalOpenForIndex === playerIndex) {
-          openHistoryModal(playerIndex);
-        }
+        if (modalOpenForIndex === pIdx) openHistoryModal(pIdx);
       }
     }
 
+    // Tabel renderen
     function renderTable() {
       const tbody = document.getElementById('scoreBody');
       tbody.innerHTML = '';
-      players.forEach((player, pIndex) => {
+      players.forEach((p, i) => {
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${player.name}</td>
-          <td>${player.points}</td>
-          <td><input type="number" id="pointsInput-${pIndex}" min="1" placeholder="0" 
-            onkeydown="addPointsOnEnter(event, ${pIndex})" /></td>
-          <td><button class="btn" onclick="addPoints(${pIndex})">➕</button></td>
-          <td><button class="btn" onclick="openHistoryModal(${pIndex})">Bekijk</button></td>
-        `;
+          <td>${p.name}</td>
+          <td>${p.points}</td>
+          <td><input type="number" id="pointsInput-${i}" min="1" placeholder="0" onkeydown="addPointsOnEnter(event, ${i})" /></td>
+          <td><button class="btn" onclick="addPoints(${i})">➕</button></td>
+          <td><button class="btn" onclick="openHistoryModal(${i})">Bekijk</button></td>`;
         tbody.appendChild(row);
       });
     }
 
+    // Winnaar tonen
     async function showWinner() {
       if (players.length === 0) {
-        alert('Er zijn nog geen spelers.');
+        alert('Nog geen spelers.');
         return;
       }
-      // Bepaal speler met hoogste score
-      let maxScore = -Infinity, winner = null;
+      let maxScore = -Infinity, winnaar = null;
       players.forEach(p => {
         if (p.points > maxScore) {
           maxScore = p.points;
-          winner = p;
+          winnaar = p;
         }
       });
-      if (!winner || maxScore <= 0) {
-        alert('Er is nog geen winnaar met punten.');
-        return;
-      }
-
-      // Fullscreen overlay met winnaar
+      if (!winnaar || maxScore <= 0) return alert('Nog geen winnaar.');
       const overlay = document.getElementById('winnerOverlay');
-      const winnerText = document.getElementById('winnerText');
-      winnerText.textContent = `Winnaar: ${winner.name} met ${winner.points} punten!`;
+      document.getElementById('winnerText').textContent = `Winnaar: ${winnaar.name} (${winnaar.points} punten!)`;
+      overlay.style.display = 'flex';
 
+      // Fullscreen
       if (document.fullscreenEnabled) {
         try {
           await document.documentElement.requestFullscreen();
-        } catch (err) {
-          console.warn('Fullscreen niet toegestaan: ', err);
-        }
+        } catch(e) { console.log(e); }
       }
-
-      overlay.style.display = 'flex';
-
-      // Confetti burst
-      confetti({
-        particleCount: 300,
-        spread: 100,
-        origin: { y: 0.6 }
-      });
+      // Confetti
+      confetti({ particleCount: 300, spread: 100, origin: { y: 0.6 } });
     }
 
+    // Sluit fullscreen winnaar
     async function closeWinner() {
-      const overlay = document.getElementById('winnerOverlay');
-      overlay.style.display = 'none';
-      if (document.fullscreenElement) {
-        try {
-          await document.exitFullscreen();
-        } catch (err) {
-          console.warn('Fullscreen afsluiten mislukt: ', err);
-        }
+      document.getElementById('winnerOverlay').style.display = 'none';
+      if (document.fullscreenElement) await document.exitFullscreen();
+    }
+
+    // Toggle fullscreen met knop
+    async function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        try { await document.documentElement.requestFullscreen(); }
+        catch (e) { console.log(e); }
+      } else {
+        try { await document.exitFullscreen(); }
+        catch (e) { console.log(e); }
       }
     }
   </script>
-
 </body>
 </html>
