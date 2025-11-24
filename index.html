@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Puntentelling Wie is de Ezel</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 30px; }
+    h2 { margin-bottom: 0; }
+    #players { margin-bottom: 30px; }
+    .player-row { display: flex; align-items: center; margin-bottom: 10px; }
+    .player-row input[type="number"] { width: 60px; margin-left: 8px; margin-right: 8px; }
+    table { border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 8px 15px; border: 1px solid #bbb; }
+    th { background: #e3e3e3; }
+    #scoreTable { background: #fff; }
+    .add-points-btn { margin-left: 4px; }
+  </style>
+</head>
+<body>
+  <h2>Puntentelling: Wie is de Ezel</h2>
+
+  <div id="players">
+    <h3>Spelers toevoegen</h3>
+    <input type="text" id="playerNameInput" placeholder="Naam speler">
+    <button onclick="addPlayer()">Toevoegen</button>
+    <p id="playerError" style="color: red; margin:6px 0 0 0;"></p>
+    <div id="playerList"></div>
+  </div>
+
+  <h3>Scoreoverzicht</h3>
+  <table id="scoreTable">
+    <thead>
+      <tr>
+        <th>Speler</th>
+        <th>Punten</th>
+        <th>Nieuwe punten</th>
+        <th>Toevoegen</th>
+      </tr>
+    </thead>
+    <tbody id="scoreBody">
+      <!-- Rijen verschijnen hier -->
+    </tbody>
+  </table>
+
+  <script>
+    let players = [];
+
+    function addPlayer() {
+      const nameInput = document.getElementById("playerNameInput");
+      const playerError = document.getElementById("playerError");
+      const name = nameInput.value.trim();
+
+      if (!name) {
+        playerError.textContent = "Naam mag niet leeg zijn.";
+        return;
+      }
+      if (players.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+        playerError.textContent = "Naam moet uniek zijn.";
+        return;
+      }
+
+      playerError.textContent = "";
+      players.push({ name: name, points: 0 });
+      nameInput.value = "";
+      renderPlayers();
+      renderTable();
+    }
+
+    function addPoints(index) {
+      const input = document.getElementById("pointsInput-" + index);
+      let add = parseInt(input.value, 10);
+      if (isNaN(add)) add = 0;
+      players[index].points += add;
+      input.value = "";
+      renderTable();
+    }
+
+    function renderPlayers() {
+      const div = document.getElementById("playerList");
+      if (players.length === 0) {
+        div.innerHTML = "<em>Geen spelers toegevoegd.</em>";
+      } else {
+        div.innerHTML = "Spelers: " + players.map(p => p.name).join(", ");
+      }
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById("scoreBody");
+      tbody.innerHTML = "";
+      players.forEach((player, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${player.name}</td>
+          <td>${player.points}</td>
+          <td><input type="number" id="pointsInput-${index}" min="0" placeholder="0"></td>
+          <td><button class="add-points-btn" onclick="addPoints(${index})">➕</button></td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+  </script>
+</body>
+</html>
