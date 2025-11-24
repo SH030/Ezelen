@@ -1,27 +1,28 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8">
-  <title>Puntentelling Wie is de Ezel</title>
+  <meta charset="UTF-8" />
+  <title>Puntentelling Wie is de Ezel met Historie en Verwijderen</title>
   <style>
     body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 30px; }
-    h2 { margin-bottom: 0;}
-    #players { margin-bottom: 30px;}
-    .player-row { display: flex; align-items: center; margin-bottom: 10px;}
-    .player-row input[type="number"] { width: 60px; margin-left: 8px; margin-right: 8px;}
-    table { border-collapse: collapse; margin-top: 20px;}
-    th, td { padding: 8px 15px; border: 1px solid #bbb;}
-    th { background: #e3e3e3;}
-    #scoreTable { background: #fff;}
-    .add-points-btn { margin-left: 4px;}
+    h2, h3 { margin-bottom: 0; }
+    #players { margin-bottom: 30px; }
+    table { border-collapse: collapse; margin-top: 20px; background: #fff; }
+    th, td { padding: 8px 15px; border: 1px solid #bbb; }
+    th { background: #e3e3e3; }
+    input[type="number"] { width: 60px; margin-left: 8px; margin-right: 8px; }
+    .btn { cursor: pointer; padding: 3px 8px; }
+    .remove-player-btn, .remove-history-btn { color: #b33; background: none; border: none; font-size: 16px; cursor: pointer; }
+    .history-container { margin-top: 10px; font-size: 0.9em; font-style: italic; }
+    .history-item { margin-bottom: 4px; }
   </style>
 </head>
 <body>
-  <h2>Puntentelling: Wie is de Ezel</h2>
+  <h2>Puntentelling: Wie is de Ezel met Historie en Verwijderen</h2>
 
   <div id="players">
     <h3>Spelers toevoegen</h3>
-    <input type="text" id="playerNameInput" placeholder="Naam speler">
+    <input type="text" id="playerNameInput" placeholder="Naam speler" />
     <button onclick="addPlayer()">Toevoegen</button>
     <p id="playerError" style="color: red; margin:6px 0 0 0;"></p>
     <div id="playerList"></div>
@@ -35,81 +36,132 @@
         <th>Punten</th>
         <th>Nieuwe punten</th>
         <th>Toevoegen</th>
+        <th>Historie</th>
+        <th>Verwijderen</th>
       </tr>
     </thead>
-    <tbody id="scoreBody">
-      <!-- Rijen verschijnen hier -->
-    </tbody>
+    <tbody id="scoreBody"></tbody>
   </table>
 
   <script>
     let players = [];
 
-    // Laad spelers bij paginareload
-    window.onload = function() {
+    window.onload = function () {
       const saved = localStorage.getItem('ezelplayers');
       if (saved) {
         players = JSON.parse(saved);
       }
       renderPlayers();
       renderTable();
-    }
+    };
 
     function savePlayers() {
       localStorage.setItem('ezelplayers', JSON.stringify(players));
     }
 
     function addPlayer() {
-      const nameInput = document.getElementById("playerNameInput");
-      const playerError = document.getElementById("playerError");
+      const nameInput = document.getElementById('playerNameInput');
+      const playerError = document.getElementById('playerError');
       const name = nameInput.value.trim();
 
       if (!name) {
-        playerError.textContent = "Naam mag niet leeg zijn.";
+        playerError.textContent = 'Naam mag niet leeg zijn.';
         return;
       }
       if (players.some(p => p.name.toLowerCase() === name.toLowerCase())) {
-        playerError.textContent = "Naam moet uniek zijn.";
+        playerError.textContent = 'Naam moet uniek zijn.';
         return;
       }
 
-      playerError.textContent = "";
-      players.push({ name: name, points: 0 });
-      nameInput.value = "";
+      playerError.textContent = '';
+      players.push({ name: name, points: 0, history: [] });
+      nameInput.value = '';
       savePlayers();
       renderPlayers();
       renderTable();
     }
 
     function addPoints(index) {
-      const input = document.getElementById("pointsInput-" + index);
+      const input = document.getElementById('pointsInput-' + index);
       let add = parseInt(input.value, 10);
-      if (isNaN(add)) add = 0;
+      if (isNaN(add) || add <= 0) {
+        input.value = '';
+        return;
+      }
       players[index].points += add;
-      input.value = "";
+      players[index].history.push(add);
+      input.value = '';
       savePlayers();
       renderTable();
     }
 
-    function renderPlayers() {
-      const div = document.getElementById("playerList");
-      if (players.length === 0) {
-        div.innerHTML = "<em>Geen spelers toegevoegd.</em>";
+    function removePlayer(index) {
+      if (index >= 0 && index < players.length) {
+        players.splice(index, 1);
+        savePlayers();
+        renderPlayers();
+        renderTable();
+      }
+    }
+
+    function toggleHistory(index) {
+      const historyDiv = document.getElementById('history-' + index);
+      if (!historyDiv) return;
+      if (historyDiv.style.display === 'none' || historyDiv.style.display === '') {
+        historyDiv.style.display = 'block';
       } else {
-        div.innerHTML = "Spelers: " + players.map(p => p.name).join(", ");
+        historyDiv.style.display = 'none';
+      }
+    }
+
+    function removeHistoryPoint(playerIndex, historyIndex) {
+      if (confirm('Weet je zeker dat je deze puntentoevoeging wilt verwijderen?')) {
+        const removedPoints = players[playerIndex].history.splice(historyIndex, 1)[0];
+        players[playerIndex].points -= removedPoints;
+        if (players[playerIndex].points < 0) players[playerIndex].points = 0;
+        savePlayers();
+        renderTable();
+      }
+    }
+
+    function renderPlayers() {
+      const div = document.getElementById('playerList');
+      if (players.length === 0) {
+        div.innerHTML = '<em>Geen spelers toegevoegd.</em>';
+      } else {
+        div.innerHTML = 'Spelers: ' + players.map(p => p.name).join(', ');
       }
     }
 
     function renderTable() {
-      const tbody = document.getElementById("scoreBody");
-      tbody.innerHTML = "";
-      players.forEach((player, index) => {
-        const row = document.createElement("tr");
+      const tbody = document.getElementById('scoreBody');
+      tbody.innerHTML = '';
+      players.forEach((player, pIndex) => {
+        const row = document.createElement('tr');
+
+        let historyHtml = '';
+        if (player.history.length > 0) {
+          historyHtml = player.history.map((pt, hIndex) =>
+            `<div class="history-item">${pt} punten 
+              <button class="remove-history-btn" title="Verwijder deze punt" onclick="removeHistoryPoint(${pIndex}, ${hIndex})">✖</button>
+            </div>`
+          ).join('');
+        } else {
+          historyHtml = '<em>Geen historie</em>';
+        }
+
         row.innerHTML = `
           <td>${player.name}</td>
           <td>${player.points}</td>
-          <td><input type="number" id="pointsInput-${index}" min="0" placeholder="0"></td>
-          <td><button class="add-points-btn" onclick="addPoints(${index})">➕</button></td>
+          <td><input type="number" id="pointsInput-${pIndex}" min="1" placeholder="0"></td>
+          <td><button class="btn" onclick="addPoints(${pIndex})">➕</button></td>
+          <td>
+            <button class="btn" onclick="toggleHistory(${pIndex})">Bekijk</button>
+            <div id="history-${pIndex}" class="history-container" style="display:none;">
+              ${historyHtml}
+            </div>
+          </td>
+          <td><button class="remove-player-btn" onclick="removePlayer(${pIndex})" title="Speler verwijderen">✖</button></td>
         `;
         tbody.appendChild(row);
       });
