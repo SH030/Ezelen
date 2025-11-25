@@ -26,10 +26,12 @@
     input[type="text"], input[type="number"] {
       font-size: 1.2rem;
       padding: 10px;
-      width: 120px;
       border-radius: 5px;
       border: 1px solid #ccc;
       box-sizing: border-box;
+    }
+    input[type="text"] {
+      width: 250px; /* Breder invoerveld */
     }
     input[type="number"] {
       width: 100px;
@@ -56,10 +58,10 @@
       font-size: 18px;
       cursor: pointer;
     }
-    /* Floating knop linksrecht onderaan */
+    /* Floating knop rechts recht onderaan */
     #floatButton {
       position: fixed;
-      right: 20px; /* Aanpassen voor positie */
+      right: 20px;
       bottom: 20px;
       background-color: #007bff;
       color: white;
@@ -126,6 +128,13 @@
       background-color: #4caf50;
       color: white;
     }
+    /* Sort buttons */
+    #sortControls {
+      margin-bottom: 10px;
+    }
+    #sortControls button {
+      margin-right: 8px;
+    }
   </style>
 </head>
 <body>
@@ -137,6 +146,13 @@
     <button class="btn" onclick="addPlayer()">Toevoegen</button>
     <p id="playerError" style="color: red; margin:6px 0 0 0;"></p>
     <div id="playerList"></div>
+  </div>
+
+  <!-- Sorteer opties -->
+  <div id="sortControls">
+    <button class="btn" onclick="sortPlayers('score')">Sorteren op score</button>
+    <button class="btn" onclick="sortPlayers('name')">Sorteren op naam</button>
+    <button class="btn" onclick="sortPlayers('original')">Sorteren op volgorde</button>
   </div>
 
   <!-- Score tabel -->
@@ -182,6 +198,7 @@
 
   <script>
     let players = [];
+    let originalOrder = [];
     let modalOpenForIndex = null;
 
     // Init
@@ -189,6 +206,8 @@
       const saved = localStorage.getItem('ezelplayers');
       if (saved) {
         players = JSON.parse(saved);
+        // Preserve original order after reload
+        originalOrder = players.map((_, i) => i);
       }
       renderPlayers();
       renderTable();
@@ -216,6 +235,7 @@
 
       errorMsg.textContent = '';
       players.push({ name: name, points: 0, history: [] });
+      originalOrder.push(players.length - 1);
       input.value = '';
       savePlayers();
       renderPlayers();
@@ -226,6 +246,7 @@
     function removePlayerByName(index) {
       if (confirm(`Weet je zeker dat je speler "${players[index].name}" wilt verwijderen?`)) {
         players.splice(index, 1);
+        originalOrder.splice(index, 1);
         savePlayers();
         renderPlayers();
         renderTable();
@@ -260,17 +281,23 @@
       renderTable();
     }
 
-    // Punt toevoegen met ENTER
-    function addPointsOnEnter(event, index) {
+    // Punt toevoegen voor alle ingevulde inputs bij Enter
+    function addAllPointsOnEnter(event) {
       if (event.key === 'Enter') {
-        addPoints(index);
+        players.forEach((p, i) => {
+          const input = document.getElementById('pointsInput-' + i);
+          if (input && input.value.trim() !== '') {
+            addPoints(i);
+          }
+        });
       }
     }
 
     // Historische punten modal openen
     function openHistoryModal(index) {
       modalOpenForIndex = index;
-      document.getElementById('modal').innerHTML = `
+      const modal = document.getElementById('modal');
+      modal.innerHTML = `
         <h3>Historische punten voor <span id="modalPlayerName"></span></h3>
         <div id="modalHistoryContainer"></div>
         <button class="btn" onclick="closeModal()">Sluiten</button>`;
@@ -324,14 +351,29 @@
         row.innerHTML = `
           <td>${p.name}</td>
           <td>${p.points}</td>
-          <td><input type="number" id="pointsInput-${i}" min="1" placeholder="0" onkeydown="addPointsOnEnter(event, ${i})" /></td>
+          <td><input type="number" id="pointsInput-${i}" min="1" placeholder="0" /></td>
           <td><button class="btn" onclick="addPoints(${i})">➕</button></td>
           <td><button class="btn" onclick="openHistoryModal(${i})">Bekijk</button></td>`;
         tbody.appendChild(row);
+        document.getElementById(`pointsInput-${i}`)
+          .addEventListener('keydown', addAllPointsOnEnter);
       });
     }
 
-    // Winnaar tonen
+    // Sorteren op criteria
+    function sortPlayers(criteria) {
+      if (criteria === 'score') {
+        players.sort((a, b) => b.points - a.points);
+      } else if (criteria === 'name') {
+        players.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (criteria === 'original') {
+        players = originalOrder.map(i => players[i]);
+      }
+      renderPlayers();
+      renderTable();
+    }
+
+    // Winnaar tonen als 'Ezel'
     async function showWinner() {
       if (players.length === 0) {
         alert('Nog geen spelers.');
@@ -346,7 +388,7 @@
       });
       if (!winnaar || maxScore <= 0) return alert('Nog geen winnaar.');
       const overlay = document.getElementById('winnerOverlay');
-      document.getElementById('winnerText').textContent = `Winnaar: ${winnaar.name} (${winnaar.points} punten!)`;
+      document.getElementById('winnerText').textContent = 'Ezel!';
       overlay.style.display = 'flex';
 
       // Fullscreen
