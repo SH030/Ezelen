@@ -47,6 +47,7 @@
       color: white;
       transition: background-color 0.3s ease;
       margin-top: 10px;
+      margin-right: 6px;
     }
     button.btn:hover {
       background-color: #45a049;
@@ -101,10 +102,7 @@
       align-items: center;
     }
     #sortControls {
-      margin-bottom: 10px;
-    }
-    #sortControls button {
-      margin-right: 8px;
+      margin: 10px 0;
     }
   </style>
 </head>
@@ -121,6 +119,9 @@
   <div id="sortControls">
     <button class="btn" onclick="sortPlayers('score')">Sorteren op score</button>
     <button class="btn" onclick="sortPlayers('name')">Sorteren op naam</button>
+    <button class="btn" onclick="sortPlayers('original')">Sorteren op invoervolgorde</button>
+    <button class="btn" onclick="showEzel()">Toon Ezel (meeste punten)</button>
+    <button class="btn" onclick="showWinner()">Toon Winnaar (minste punten)</button>
   </div>
 
   <h3>Scoreoverzicht</h3>
@@ -151,12 +152,14 @@
 
   <script>
     let players = [];
+    let originalOrder = [];
     let modalOpenForIndex = null;
 
     window.onload = function () {
       const saved = localStorage.getItem('ezelplayers');
       if (saved) {
         players = JSON.parse(saved);
+        originalOrder = Array.from(players.keys());
       }
       renderPlayers();
       renderTable();
@@ -182,6 +185,7 @@
 
       errorMsg.textContent = '';
       players.push({ name: name, points: 0, history: [] });
+      originalOrder.push(players.length - 1);
       input.value = '';
       savePlayers();
       renderPlayers();
@@ -191,6 +195,7 @@
     function removePlayerByName(index) {
       if (confirm(`Weet je zeker dat je speler "${players[index].name}" wilt verwijderen?`)) {
         players.splice(index, 1);
+        originalOrder.splice(index, 1);
         savePlayers();
         renderPlayers();
         renderTable();
@@ -213,7 +218,7 @@
       const input = document.getElementById('pointsInput-' + index);
       let val = input.value.trim();
       if (val === '') {
-        return; // leeg veld niet toevoegen
+        return;
       }
       let add = parseInt(val, 10);
       if (isNaN(add) || add < 0) {
@@ -229,12 +234,22 @@
 
     function addAllPointsOnEnter(event) {
       if (event.key === 'Enter') {
+        event.preventDefault();
+
         players.forEach((p, i) => {
           const input = document.getElementById('pointsInput-' + i);
-          if (input && input.value.trim() !== '') {
+          if (input && input.value.trim() !== '' && input !== event.target) {
             addPoints(i);
           }
         });
+
+        const currInputId = event.target.id;
+        if (currInputId) {
+          const idx = parseInt(currInputId.split('-')[1], 10);
+          if (!isNaN(idx)) {
+            addPoints(idx);
+          }
+        }
       }
     }
 
@@ -306,9 +321,31 @@
         players.sort((a, b) => b.points - a.points);
       } else if (criteria === 'name') {
         players.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (criteria === 'original') {
+        players = originalOrder.map(i => players[i]);
       }
       renderPlayers();
       renderTable();
+    }
+
+    function showEzel() {
+      if (players.length === 0) {
+        alert('Geen spelers.');
+        return;
+      }
+      let maxPunten = Math.max(...players.map(p => p.points));
+      let ezel = players.find(p => p.points === maxPunten);
+      alert(`Ezel: ${ezel.name} (${ezel.points} punten)`);
+    }
+
+    function showWinner() {
+      if (players.length === 0) {
+        alert('Geen spelers.');
+        return;
+      }
+      let minPunten = Math.min(...players.map(p => p.points));
+      let winnaar = players.find(p => p.points === minPunten);
+      alert(`Winnaar: ${winnaar.name} (${winnaar.points} punten)`);
     }
 
     async function toggleFullscreen() {
