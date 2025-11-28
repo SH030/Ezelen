@@ -57,8 +57,19 @@
       background: #e3e3e3; 
       font-weight: 600;
     }
+    
+    /* Mobile table optimalisatie - GEEN cards meer */
     @media (max-width: 768px) {
-      th, td { padding: 12px 8px; font-size: 0.95rem; }
+      table { font-size: 15px; margin: 15px 0; }
+      th, td { 
+        padding: 12px 8px; 
+        font-size: 14px; 
+        min-height: 48px;
+      }
+      th:nth-child(1), td:nth-child(1) { min-width: 90px; } /* Speler */
+      th:nth-child(2), td:nth-child(2) { min-width: 70px; } /* Punten */
+      th:nth-child(3), td:nth-child(3) { min-width: 70px; } /* Entries */
+      th:nth-child(4), td:nth-child(4) { padding: 8px; }    /* Input+Btn */
     }
     
     .entry-count {
@@ -74,15 +85,33 @@
       background-color: #e7f3ff;
     }
     
-    input[type="text"], input[type="number"] {
-      font-size: 1.1rem;
-      padding: 14px;
-      border-radius: 8px;
-      border: 2px solid #ddd;
-      width: 100%;
-      min-height: 48px;
+    /* SAMENGESTELDE CEL: Input + Button */
+    .input-action-cell {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      padding: 8px;
     }
-    input[type="number"] { text-align: center; }
+    .input-action-cell input {
+      flex: 1;
+      font-size: 1rem;
+      padding: 10px 8px;
+      border-radius: 6px;
+      border: 2px solid #ddd;
+      min-height: 40px;
+    }
+    .input-action-cell button {
+      padding: 10px 12px;
+      font-size: 1rem;
+      min-height: 40px;
+      min-width: 50px;
+      flex-shrink: 0;
+    }
+    @media (max-width: 768px) {
+      .input-action-cell { gap: 4px; padding: 6px; }
+      .input-action-cell input { padding: 8px 6px; font-size: 14px; }
+      .input-action-cell button { padding: 8px 10px; font-size: 14px; min-width: 44px; }
+    }
     
     button.btn {
       cursor: pointer;
@@ -105,7 +134,7 @@
     button.btn-red { background-color: #f44336; }
     button.btn-gold { background-color: #FFD700; color: #333; }
     
-    /* Sort controls boven tabel */
+    /* Sort controls */
     #sortControls {
       display: flex; flex-wrap: wrap; gap: 10px;
       margin: 20px 0; padding: 15px; background: white;
@@ -144,7 +173,7 @@
       justify-content: center;
     }
     
-    /* Modals */
+    /* Modals blijven hetzelfde */
     .modal-background {
       display: none; position: fixed; top: 0; left: 0; 
       width: 100vw; height: 100vh; background: rgba(0,0,0,0.7);
@@ -196,31 +225,14 @@
       100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
     }
     
-    /* Mobile specific */
     @media (max-width: 768px) {
       body { padding: 10px; font-size: 18px; }
       h2 { font-size: 2rem; }
-      table { font-size: 16px; margin: 15px 0; }
-      th, td { padding: 12px 6px; }
       #sortControls { flex-direction: column; gap: 12px; }
       #actionBar { flex-direction: column; gap: 15px; padding: 25px 20px; }
       button.btn { padding: 16px 24px; font-size: 1.1rem; }
       .celebration-title { font-size: 2.2em; }
       .celebration-subtitle { font-size: 1.8em; }
-    }
-    @media (max-width: 480px) {
-      table, thead, tbody, th, td, tr { display: block; }
-      thead tr { position: absolute; top: -9999px; left: -9999px; }
-      tr { border: 1px solid #ccc; margin-bottom: 15px; border-radius: 8px; padding: 15px; background: white; }
-      td { 
-        border: none; position: relative; padding-left: 50%; 
-        text-align: right; display: block;
-      }
-      td:before {
-        content: attr(data-label); position: absolute; left: 6px;
-        width: 45%; font-weight: 600; text-align: left;
-      }
-      .entry-count { justify-content: flex-end; }
     }
   </style>
 </head>
@@ -242,16 +254,15 @@
     <button class="btn btn-green" onclick="sortPlayers('original')">📋 Volgorde</button>
   </div>
 
-  <!-- Tabel -->
+  <!-- Tabel met 4 kolommen -->
   <h3>📈 Scoreoverzicht</h3>
   <table id="scoreTable">
     <thead>
       <tr>
-        <th data-label="Speler">👤 Speler</th>
-        <th data-label="Punten">📊 Punten</th>
-        <th data-label="Entries">📝 Entries</th>
-        <th data-label="Nieuw">➕ Nieuw</th>
-        <th data-label="Actie">⚡ Actie</th>
+        <th>👤 Speler</th>
+        <th>📊 Punten</th>
+        <th class="entry-count" style="cursor: default;">📝 Entries</th>
+        <th>➕ Punten toevoegen</th>
       </tr>
     </thead>
     <tbody id="scoreBody"></tbody>
@@ -266,7 +277,7 @@
 
   <button id="floatButton" onclick="toggleFullscreen()" title="Volledig scherm">⛶</button>
 
-  <!-- History Modal -->
+  <!-- Modals blijven hetzelfde -->
   <div id="modalBackground" class="modal-background" onclick="closeHistoryModal(event)">
     <div id="modal" class="modal-content" onclick="event.stopPropagation()">
       <h3>📋 Historie <span id="modalPlayerName"></span></h3>
@@ -275,7 +286,6 @@
     </div>
   </div>
 
-  <!-- Winner Modal -->
   <div id="winnerModal" class="modal-background" onclick="closeCelebrationModal(event)">
     <div class="celebration-content modal-content" onclick="event.stopPropagation()">
       <div class="winner-trophy">🏆</div>
@@ -286,7 +296,6 @@
     </div>
   </div>
 
-  <!-- Ezel Modal -->
   <div id="ezelModal" class="modal-background" onclick="closeCelebrationModal(event)">
     <div class="celebration-content modal-content" onclick="event.stopPropagation()">
       <div class="ezel-emoji">🐴</div>
@@ -298,7 +307,6 @@
   </div>
 
   <script>
-    // JavaScript blijft identiek
     let players = [];
     let insertionCount = 0;
     let modalOpenForIndex = null;
@@ -488,11 +496,13 @@
         const entryCount = p.history.length;
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td data-label="Speler">${p.name}</td>
-          <td data-label="Punten">${p.points}</td>
+          <td>${p.name}</td>
+          <td>${p.points}</td>
           <td class="entry-count" onclick="openHistoryModal(${i})" title="Tik voor historie">${entryCount}</td>
-          <td data-label="Nieuw"><input type="number" id="pointsInput-${i}" min="0" placeholder="0" /></td>
-          <td data-label="Actie"><button class="btn btn-green" onclick="addPoints(${i})">➕</button></td>`;
+          <td class="input-action-cell">
+            <input type="number" id="pointsInput-${i}" min="0" placeholder="0" />
+            <button class="btn btn-green" onclick="addPoints(${i})">➕</button>
+          </td>`;
         tbody.appendChild(row);
         document.getElementById(`pointsInput-${i}`)
           .addEventListener('keydown', addAllPointsOnEnter);
