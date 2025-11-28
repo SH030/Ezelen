@@ -23,6 +23,15 @@
     table { border-collapse: collapse; margin-top: 15px; background: #fff; }
     th, td { padding: 10px 20px; border: 1px solid #bbb; font-size: 1.1rem; }
     th { background: #e3e3e3; }
+    .entry-count {
+      cursor: pointer;
+      text-align: center;
+      font-weight: bold;
+      color: #007bff;
+    }
+    .entry-count:hover {
+      background-color: #e7f3ff;
+    }
     input[type="text"], input[type="number"] {
       font-size: 1.2rem;
       padding: 10px;
@@ -43,14 +52,23 @@
       font-size: 1.1rem;
       border-radius: 5px;
       border: none;
-      background-color: #4CAF50;
       color: white;
       transition: background-color 0.3s ease;
       margin-top: 10px;
       margin-right: 6px;
     }
     button.btn:hover {
-      background-color: #45a049;
+      opacity: 0.9;
+    }
+    button.btn-green {
+      background-color: #4CAF50;
+    }
+    button.btn-red {
+      background-color: #f44336;
+    }
+    button.btn-gold {
+      background-color: #FFD700;
+      color: #333;
     }
     .remove-history-btn {
       color: #b33;
@@ -77,6 +95,7 @@
       justify-content: center;
       z-index: 9999;
     }
+    /* History Modal */
     #modalBackground {
       display: none;
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -94,7 +113,29 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
       font-size: 1.1rem;
     }
-    #modal h3 { margin-top: 0; }
+    /* Winner & Ezel Modals */
+    .celebration-modal {
+      display: none;
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.8);
+      justify-content: center; align-items: center;
+      z-index: 1001;
+      animation: fadeIn 0.3s ease;
+    }
+    .celebration-content {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      max-width: 500px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      animation: bounceIn 0.6s ease;
+    }
+    .winner-trophy { font-size: 4em; margin-bottom: 20px; }
+    .ezel-emoji { font-size: 6em; margin-bottom: 20px; animation: shake 1s infinite; }
+    .celebration-title { font-size: 2.5em; margin-bottom: 10px; }
+    .celebration-subtitle { font-size: 1.8em; margin-bottom: 30px; }
     .history-item {
       margin-bottom: 10px;
       display: flex;
@@ -104,6 +145,30 @@
     #sortControls {
       margin: 10px 0;
     }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes bounceIn {
+      0% { transform: scale(0.3); opacity: 0; }
+      50% { transform: scale(1.05); }
+      70% { transform: scale(0.9); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes shake {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-10deg); }
+      75% { transform: rotate(10deg); }
+    }
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      pointer-events: none;
+      z-index: 1002;
+      animation: confetti-fall 3s linear infinite;
+    }
+    @keyframes confetti-fall {
+      0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
   </style>
 </head>
 <body>
@@ -111,17 +176,18 @@
   <div id="players">
     <h3>Spelers (klik op naam voor verwijderen)</h3>
     <input type="text" id="playerNameInput" placeholder="Naam speler" />
-    <button class="btn" onclick="addPlayer()">Toevoegen</button>
+    <button class="btn btn-green" onclick="addPlayer()">Toevoegen</button>
     <p id="playerError" style="color: red; margin:6px 0 0 0;"></p>
     <div id="playerList"></div>
   </div>
 
   <div id="sortControls">
-    <button class="btn" onclick="sortPlayers('score')">Sorteren op score</button>
-    <button class="btn" onclick="sortPlayers('name')">Sorteren op naam</button>
-    <button class="btn" onclick="sortPlayers('original')">Sorteren op invoervolgorde</button>
-    <button class="btn" onclick="showEzel()">Toon Ezel (meeste punten)</button>
-    <button class="btn" onclick="showWinner()">Toon Winnaar (minste punten)</button>
+    <button class="btn btn-green" onclick="sortPlayers('score')">Sorteren op score</button>
+    <button class="btn btn-green" onclick="sortPlayers('name')">Sorteren op naam</button>
+    <button class="btn btn-green" onclick="sortPlayers('original')">Sorteren op invoervolgorde</button>
+    <button class="btn btn-gold" onclick="showWinnerModal()">🏆 Winnaar</button>
+    <button class="btn btn-red" onclick="showEzelModal()">🐴 Ezel</button>
+    <button class="btn btn-red" onclick="clearAll()">Clear All</button>
   </div>
 
   <h3>Scoreoverzicht</h3>
@@ -130,9 +196,9 @@
       <tr>
         <th>Speler</th>
         <th>Punten</th>
+        <th>Aantal entries</th>
         <th>Nieuwe punten</th>
         <th>Toevoegen</th>
-        <th>Historie</th>
       </tr>
     </thead>
     <tbody id="scoreBody"></tbody>
@@ -142,24 +208,61 @@
     ⛶
   </button>
 
-  <div id="modalBackground" onclick="closeModal(event)">
+  <!-- History Modal -->
+  <div id="modalBackground" onclick="closeHistoryModal(event)">
     <div id="modal" onclick="event.stopPropagation()">
       <h3>Historische punten voor <span id="modalPlayerName"></span></h3>
       <div id="modalHistoryContainer"></div>
-      <button class="btn" onclick="closeModal()">Sluiten</button>
+      <button class="btn btn-green" onclick="closeHistoryModal()">Sluiten</button>
+    </div>
+  </div>
+
+  <!-- Winner Modal -->
+  <div id="winnerModal" class="celebration-modal" onclick="closeCelebrationModal(event)">
+    <div class="celebration-content" onclick="event.stopPropagation()">
+      <div class="winner-trophy">🏆</div>
+      <div class="celebration-title">Gefeliciteerd!</div>
+      <div class="celebration-subtitle" id="winnerName">Winnaar</div>
+      <div style="font-size: 1.5em; margin-bottom: 30px;" id="winnerScore">-</div>
+      <button class="btn btn-gold" onclick="closeCelebrationModal()">Sluiten</button>
+    </div>
+  </div>
+
+  <!-- Ezel Modal -->
+  <div id="ezelModal" class="celebration-modal" onclick="closeCelebrationModal(event)">
+    <div class="celebration-content" onclick="event.stopPropagation()">
+      <div class="ezel-emoji">🐴</div>
+      <div class="celebration-title">Ezel!</div>
+      <div class="celebration-subtitle" id="ezelName">Ezel</div>
+      <div style="font-size: 1.5em; margin-bottom: 30px;" id="ezelScore">-</div>
+      <button class="btn btn-red" onclick="closeCelebrationModal()">Sluiten</button>
     </div>
   </div>
 
   <script>
     let players = [];
-    let originalOrder = [];
+    let insertionCount = 0;
     let modalOpenForIndex = null;
+
+    // Confetti functie
+    function createConfetti() {
+      for (let i = 0; i < 100; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        confetti.style.animationDelay = Math.random() * 3 + 's';
+        confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 5000);
+      }
+    }
 
     window.onload = function () {
       const saved = localStorage.getItem('ezelplayers');
       if (saved) {
         players = JSON.parse(saved);
-        originalOrder = Array.from(players.keys());
+        insertionCount = players.reduce((max, p) => Math.max(max, p.insertionIndex ?? 0), -1) + 1;
       }
       renderPlayers();
       renderTable();
@@ -184,8 +287,7 @@
       }
 
       errorMsg.textContent = '';
-      players.push({ name: name, points: 0, history: [] });
-      originalOrder.push(players.length - 1);
+      players.push({ name, points: 0, history: [], insertionIndex: insertionCount++ });
       input.value = '';
       savePlayers();
       renderPlayers();
@@ -195,11 +297,20 @@
     function removePlayerByName(index) {
       if (confirm(`Weet je zeker dat je speler "${players[index].name}" wilt verwijderen?`)) {
         players.splice(index, 1);
-        originalOrder.splice(index, 1);
         savePlayers();
         renderPlayers();
         renderTable();
-        closeModal();
+        closeHistoryModal();
+      }
+    }
+
+    function clearAll() {
+      if (confirm('Weet je zeker dat je ALLE spelers en hun scores wilt verwijderen? Dit kan niet ongedaan gemaakt worden.')) {
+        players = [];
+        insertionCount = 0;
+        localStorage.removeItem('ezelplayers');
+        renderPlayers();
+        renderTable();
       }
     }
 
@@ -216,15 +327,17 @@
 
     function addPoints(index) {
       const input = document.getElementById('pointsInput-' + index);
-      let val = input.value.trim();
-      if (val === '') {
-        return;
-      }
-      let add = parseInt(val, 10);
+      if (!input) return;
+
+      const val = input.value.trim();
+      if (val === '') return;
+
+      const add = parseInt(val, 10);
       if (isNaN(add) || add < 0) {
         input.value = '';
         return;
       }
+
       players[index].points += add;
       players[index].history.push(add);
       input.value = '';
@@ -233,24 +346,29 @@
     }
 
     function addAllPointsOnEnter(event) {
-      if (event.key === 'Enter') {
-        event.preventDefault();
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
 
-        players.forEach((p, i) => {
-          const input = document.getElementById('pointsInput-' + i);
-          if (input && input.value.trim() !== '' && input !== event.target) {
-            addPoints(i);
-          }
-        });
+      const values = players.map((p, i) => {
+        const input = document.getElementById('pointsInput-' + i);
+        return input ? input.value.trim() : '';
+      });
 
-        const currInputId = event.target.id;
-        if (currInputId) {
-          const idx = parseInt(currInputId.split('-')[1], 10);
-          if (!isNaN(idx)) {
-            addPoints(idx);
-          }
-        }
-      }
+      values.forEach((val, i) => {
+        if (val === '') return;
+        const add = parseInt(val, 10);
+        if (isNaN(add) || add < 0) return;
+        players[i].points += add;
+        players[i].history.push(add);
+      });
+
+      players.forEach((p, i) => {
+        const input = document.getElementById('pointsInput-' + i);
+        if (input) input.value = '';
+      });
+
+      savePlayers();
+      renderTable();
     }
 
     function openHistoryModal(index) {
@@ -259,7 +377,7 @@
       modal.innerHTML = `
         <h3>Historische punten voor <span id="modalPlayerName"></span></h3>
         <div id="modalHistoryContainer"></div>
-        <button class="btn" onclick="closeModal()">Sluiten</button>`;
+        <button class="btn btn-green" onclick="closeHistoryModal()">Sluiten</button>`;
       const modalName = document.getElementById('modalPlayerName');
       const container = document.getElementById('modalHistoryContainer');
 
@@ -282,10 +400,17 @@
       document.getElementById('modalBackground').style.display = 'flex';
     }
 
-    function closeModal(e) {
+    function closeHistoryModal(e) {
       if (e && e.target.id !== 'modalBackground') return;
       document.getElementById('modalBackground').style.display = 'none';
       modalOpenForIndex = null;
+    }
+
+    function closeCelebrationModal(e) {
+      document.getElementById('winnerModal').style.display = 'none';
+      document.getElementById('ezelModal').style.display = 'none';
+      // Verwijder confetti
+      document.querySelectorAll('.confetti').forEach(c => c.remove());
     }
 
     function removeHistoryPoint(pIdx, hIdx) {
@@ -303,17 +428,43 @@
       const tbody = document.getElementById('scoreBody');
       tbody.innerHTML = '';
       players.forEach((p, i) => {
+        const entryCount = p.history.length;
         const row = document.createElement('tr');
         row.innerHTML = `
           <td>${p.name}</td>
           <td>${p.points}</td>
+          <td class="entry-count" onclick="openHistoryModal(${i})" title="Klik om historie te bekijken">${entryCount}</td>
           <td><input type="number" id="pointsInput-${i}" min="0" placeholder="0" /></td>
-          <td><button class="btn" onclick="addPoints(${i})">➕</button></td>
-          <td><button class="btn" onclick="openHistoryModal(${i})">Bekijk</button></td>`;
+          <td><button class="btn btn-green" onclick="addPoints(${i})">➕</button></td>`;
         tbody.appendChild(row);
         document.getElementById(`pointsInput-${i}`)
           .addEventListener('keydown', addAllPointsOnEnter);
       });
+    }
+
+    function showWinnerModal() {
+      if (players.length === 0) {
+        alert('Geen spelers.');
+        return;
+      }
+      let minPunten = Math.min(...players.map(p => p.points));
+      let winnaar = players.find(p => p.points === minPunten);
+      document.getElementById('winnerName').textContent = winnaar.name;
+      document.getElementById('winnerScore').textContent = `${winnaar.points} punten`;
+      document.getElementById('winnerModal').style.display = 'flex';
+      createConfetti(); // Confetti voor winnaar
+    }
+
+    function showEzelModal() {
+      if (players.length === 0) {
+        alert('Geen spelers.');
+        return;
+      }
+      let maxPunten = Math.max(...players.map(p => p.points));
+      let ezel = players.find(p => p.points === maxPunten);
+      document.getElementById('ezelName').textContent = ezel.name;
+      document.getElementById('ezelScore').textContent = `${ezel.points} punten`;
+      document.getElementById('ezelModal').style.display = 'flex';
     }
 
     function sortPlayers(criteria) {
@@ -322,30 +473,10 @@
       } else if (criteria === 'name') {
         players.sort((a, b) => a.name.localeCompare(b.name));
       } else if (criteria === 'original') {
-        players = originalOrder.map(i => players[i]);
+        players.sort((a, b) => (a.insertionIndex ?? 0) - (b.insertionIndex ?? 0));
       }
       renderPlayers();
       renderTable();
-    }
-
-    function showEzel() {
-      if (players.length === 0) {
-        alert('Geen spelers.');
-        return;
-      }
-      let maxPunten = Math.max(...players.map(p => p.points));
-      let ezel = players.find(p => p.points === maxPunten);
-      alert(`Ezel: ${ezel.name} (${ezel.points} punten)`);
-    }
-
-    function showWinner() {
-      if (players.length === 0) {
-        alert('Geen spelers.');
-        return;
-      }
-      let minPunten = Math.min(...players.map(p => p.points));
-      let winnaar = players.find(p => p.points === minPunten);
-      alert(`Winnaar: ${winnaar.name} (${winnaar.points} punten)`);
     }
 
     async function toggleFullscreen() {
