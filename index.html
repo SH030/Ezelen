@@ -3,26 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Puntentelling Wie is de Ezel</title>
+  <title>Puntentelling Wie is de Ezel - Mobile Friendly</title>
   <style>
-    html { box-sizing: border-box; }
-    *, *:before, *:after { box-sizing: inherit; }
+    * { box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: #f4f4f4;
-      margin: 0; padding: 15px; line-height: 1.5; font-size: 16px;
+      margin: 0;
+      padding: 15px;
+      line-height: 1.5;
+      font-size: 16px;
     }
-    h2 { margin: 0 0 20px 0; font-size: 1.8rem; }
+    h2 { font-size: 1.8rem; margin: 0 0 20px 0; }
     h3 { font-size: 1.3rem; margin: 0 0 15px 0; }
-
-    #players {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: end;
-      margin-bottom: 25px;
-    }
-    #playerNameInput {
+    
+    #players { margin-bottom: 25px; }
+    
+    /* Speler toevoegen: groter input, kleinere button */
+    #players input[type="text"] {
       flex: 1;
       font-size: 1.1rem;
       padding: 16px 20px;
@@ -38,193 +36,316 @@
       min-width: 70px !important;
       flex-shrink: 0;
     }
-    #playerError { color: #f44336; font-weight: 500; width: 100%; margin: 7px 0 0 0; }
-
-    .table-wrapper {
-      width: 100%;
-      overflow-x: auto;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      margin-bottom: 25px;
-    }
+    
     table {
-      width: 100%;
       border-collapse: collapse;
-      table-layout: fixed;
-      min-width: 330px;
+      margin: 20px 0;
       background: #fff;
+      width: 100%;
+      font-size: 1rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      overflow: hidden;
     }
     th, td {
-      padding: 12px 7px;
+      padding: 15px 12px;
       border: 1px solid #ddd;
-      min-height: 35px;
-      vertical-align: middle;
       text-align: left;
-      font-size: 1rem;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      min-height: 50px;
+      vertical-align: middle;
     }
-    th { background: #e3e3e3; font-weight: 600; }
-    th:nth-child(1), td:nth-child(1) { width: 34%; max-width: 110px; }
-    th:nth-child(2), td:nth-child(2) { width: 22%; max-width: 72px; text-align: center; }
-    th:nth-child(3), td:nth-child(3) { width: 44%; }
+    th {
+      background: #e3e3e3;
+      font-weight: 600;
+    }
 
+    /* Aanklikbare speler naam */
     .player-name {
       cursor: pointer;
       color: #333;
       font-weight: 500;
-      padding: 3px 6px;
+      padding: 4px 8px;
       border-radius: 6px;
-      transition: background 0.15s;
-      display: inline-block;
+      transition: all 0.2s ease;
+      display: block;
       user-select: none;
     }
     .player-name:hover, .player-name:active {
       background: #ffeaa7;
       color: #333;
     }
+
+    @media (max-width: 768px) {
+      table {
+        font-size: 14px;
+        margin: 15px 0;
+      }
+      th, td {
+        padding: 8px 6px;
+        min-height: 40px;
+      }
+      th:nth-child(1), td:nth-child(1) {
+        min-width: 90px;
+        max-width: 120px;
+      }
+      th:nth-child(2), td:nth-child(2) {
+        min-width: 70px;
+        max-width: 90px;
+      }
+      /* Input+button kolom klein en naast score zonder omslaan */
+      th:nth-child(3), td:nth-child(3) {
+        min-width: 90px;
+        max-width: 100px;
+        white-space: nowrap;
+      }
+      .input-action-cell input {
+        width: 50px;
+        padding: 5px 6px;
+        font-size: 13px;
+      }
+      .input-action-cell button {
+        padding: 6px 8px;
+        min-width: 40px;
+        font-size: 13px;
+      }
+      /* Speler invoer responsive */
+      #players input[type="text"] {
+        margin-right: 8px;
+        margin-bottom: 12px;
+        width: 100%;
+      }
+      #addPlayerBtn {
+        width: 100%;
+        min-width: auto !important;
+      }
+    }
+
     .entry-count {
       cursor: pointer;
-      color: #007bff;
+      text-align: center;
       font-weight: bold;
+      color: #007bff;
+      padding: 15px;
+      min-height: 50px;
+      display: flex; align-items: center; justify-content: center;
       user-select: none;
     }
-    .entry-count:hover { background: #e7f3ff; }
+    .entry-count:hover, .entry-count:active {
+      background-color: #e7f3ff;
+    }
 
     .input-action-cell {
       display: flex;
-      gap: 5px;
+      gap: 6px;
       align-items: center;
-      justify-content: flex-start;
-      padding: 2px 0;
+      padding: 8px;
     }
     .input-action-cell input {
-      width: 40px;
-      min-width: 0;
-      padding: 4px 5px;
-      font-size: 13px;
       border-radius: 6px;
       border: 2px solid #ddd;
+      min-height: 40px;
       text-align: center;
     }
-    .input-action-cell button {
-      padding: 4px 9px;
-      font-size: 14px;
-      min-width: 32px;
-      min-height: 32px;
-      border-radius: 6px;
-      border: none;
+
+    button.btn {
       cursor: pointer;
-      background: #4CAF50;
+      padding: 14px 20px;
+      font-size: 1rem;
+      font-weight: 500;
+      border-radius: 8px;
+      border: none;
       color: white;
-      font-weight: 600;
-      transition: background 0.2s;
-      flex-shrink: 0;
+      min-height: 48px;
+      min-width: 80px;
+      touch-action: manipulation;
+      transition: all 0.2s ease;
+      user-select: none;
     }
-    .input-action-cell button:hover { background: #388e3c; }
+    button.btn:hover, button.btn:active {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    button.btn-green { background-color: #4CAF50; }
+    button.btn-red { background-color: #f44336; }
+    button.btn-gold { background-color: #FFD700; color: #333; }
 
     #sortControls {
-      display: flex; gap: 10px;
-      margin: 20px 0 0 0; padding: 13px 0;
-      background: white; border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      display: flex; flex-wrap: wrap; gap: 10px;
+      margin: 20px 0; padding: 15px; background: white;
+      border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
-    #sortControls .btn {
-      background: #4CAF50; color: #fff; font-size: 1rem; border-radius: 8px; border: none;
-      padding: 10px 16px;
-      cursor: pointer; transition: background 0.2s;
-    }
-    #sortControls .btn:hover { background: #388e3c; }
 
     #actionBar {
-      display: flex; flex-wrap: wrap; gap: 10px;
-      justify-content: center;
+      display: flex; flex-wrap: wrap; gap: 12px;
+      margin: 25px 0; padding: 20px;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       border-radius: 16px;
       box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-      margin: 20px 0 0 0;
-      padding: 14px 6px;
+      justify-content: center;
     }
     #actionBar .btn {
-      flex: 1; min-width: 120px;
-      font-size: 1.06rem; font-weight: 600;
-      padding: 11px 15px;
+      flex: 1; min-width: 140px;
+      font-size: 1.1rem; font-weight: 600;
+      padding: 16px 24px;
     }
-    #actionBar .btn-gold { background: #FFD700; color: #222; }
-    #actionBar .btn-red { background: #f44336; }
-    #actionBar .btn-green { background: #4CAF50; }
 
-    /* MOBILE SPECIFIEK */
-    @media (max-width: 600px) {
-      body { font-size: 15px; }
-      th, td { font-size: 13px; padding: 7px 4px; }
-      #players input[type="text"] {
-        font-size: 1rem;
-        padding: 11px 8px;
-        min-height: 38px;
-        margin-right: 7px;
-      }
-      #addPlayerBtn {
-        padding: 10px 13px !important;
-        min-width: 36px !important;
-        font-size: 13px;
-      }
-      .input-action-cell input { width: 32px; font-size: 12px; padding: 4px 4px; }
-      .input-action-cell button { min-width: 27px; font-size: 13px; padding: 4px 7px; }
-      th:nth-child(1), td:nth-child(1) { width: 35%; max-width: 85px; }
-      th:nth-child(2), td:nth-child(2) { width: 25%; max-width: 60px; }
-      th:nth-child(3), td:nth-child(3) { width: 40%; min-width: 65px; }
+    .remove-history-btn {
+      color: #b33; background: none; border: none;
+      font-size: 20px; width: 32px; height: 32px;
+      cursor: pointer; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center;
+      user-select: none;
     }
-    /* Voor scrolling op ultra kleine schermen */
-    .table-wrapper { overflow-x:auto; }
+
+    #floatButton {
+      position: fixed; right: 20px; bottom: 20px;
+      background: linear-gradient(45deg, #007bff, #0056b3);
+      color: white; border: none; border-radius: 50%;
+      width: 70px; height: 70px; font-size: 1.8em;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      z-index: 9999; display: flex; align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+
+    /* Modals en animaties */
+    .modal-background {
+      display: none; position: fixed; top: 0; left: 0;
+      width: 100vw; height: 100vh; background: rgba(0,0,0,0.7);
+      justify-content: center; align-items: center; z-index: 1000;
+      padding: 20px;
+    }
+    .modal-content {
+      background: white; border-radius: 16px;
+      max-width: 95vw; max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+    #modal { padding: 25px; font-size: 1.1rem; }
+    .celebration-content {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white; padding: 40px 30px; border-radius: 20px;
+      text-align: center; max-width: 90vw;
+      animation: bounceIn 0.6s ease;
+    }
+    .winner-trophy { font-size: 5em; margin-bottom: 20px; }
+    .ezel-emoji { font-size: 7em; margin-bottom: 20px; animation: shake 1s infinite; }
+    .celebration-title { font-size: 2.5em; margin: 0 0 10px 0; }
+    .celebration-subtitle { font-size: 2em; margin-bottom: 20px; }
+
+    .history-item {
+      margin-bottom: 15px; display: flex;
+      justify-content: space-between; align-items: center;
+      padding: 12px; background: #f8f9fa; border-radius: 8px;
+    }
+
+    @keyframes bounceIn {
+      0% { transform: scale(0.3); opacity: 0; }
+      50% { transform: scale(1.05); }
+      70% { transform: scale(0.9); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes shake {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-10deg); }
+      75% { transform: rotate(10deg); }
+    }
+    .confetti {
+      position: fixed; width: 12px; height: 12px;
+      pointer-events: none; z-index: 1002;
+      animation: confetti-fall 3s linear infinite;
+    }
+    @keyframes confetti-fall {
+      0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
   </style>
 </head>
 <body>
   <h2>🎮 Wie is de Ezel</h2>
 
-  <form id="players" onsubmit="event.preventDefault(); addPlayer();">
-    <input type="text" id="playerNameInput" placeholder="Naam nieuwe speler... (Enter)" autocomplete="off" />
-    <button id="addPlayerBtn" type="button" onclick="addPlayer()">➕</button>
-    <p id="playerError"></p>
-  </form>
+  <div id="players" style="display:flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 25px;">
+    <input
+      type="text"
+      id="playerNameInput"
+      placeholder="Naam nieuwe speler... (Enter)"
+      style="flex: 1; font-size: 1.1rem; padding: 16px 20px; border-radius: 12px; border: 2px solid #ddd; min-height: 52px; margin-right: 12px;"
+    />
+    <button id="addPlayerBtn" class="btn btn-green" style="padding: 12px 16px; min-height: 48px; min-width: 70px;" onclick="addPlayer()">➕</button>
+    <p id="playerError" style="color:#f44336; margin:8px 0 0 0; font-weight:500; width: 100%;"></p>
+  </div>
 
   <div id="sortControls">
-    <button class="btn" onclick="sortPlayers('score')" type="button">📊 Score</button>
-    <button class="btn" onclick="sortPlayers('name')" type="button">🔤 Naam</button>
-    <button class="btn" onclick="sortPlayers('original')" type="button">📋 Volgorde</button>
+    <button class="btn btn-green" onclick="sortPlayers('score')">📊 Score</button>
+    <button class="btn btn-green" onclick="sortPlayers('name')">🔤 Naam</button>
+    <button class="btn btn-green" onclick="sortPlayers('original')">📋 Volgorde</button>
   </div>
 
-  <h3>
-    📈 Scoreoverzicht&nbsp;<small>(tik speler naam om te verwijderen)</small>
-  </h3>
-  <div class="table-wrapper">
-    <table id="scoreTable">
-      <thead>
-        <tr>
-          <th>👤 Speler</th>
-          <th>📊 Punten</th>
-          <th>➕ Nieuw + actie</th>
-        </tr>
-      </thead>
-      <tbody id="scoreBody"></tbody>
-    </table>
-  </div>
+  <h3>📈 Scoreoverzicht <small>(tik speler naam om te verwijderen)</small></h3>
+  <table id="scoreTable" aria-label="Score overzicht spelers">
+    <thead>
+      <tr>
+        <th scope="col">👤 Speler</th>
+        <th scope="col">📊 Punten</th>
+        <th scope="col">➕ Nieuw + actie</th>
+      </tr>
+    </thead>
+    <tbody id="scoreBody"></tbody>
+  </table>
 
   <div id="actionBar">
-    <button class="btn btn-gold" onclick="showWinnerModal()" type="button">🏆 Winnaar</button>
-    <button class="btn btn-red" onclick="showEzelModal()" type="button">🐴 Ezel</button>
-    <button class="btn btn-red" onclick="clearAll()" type="button">🗑️ Clear All</button>
+    <button class="btn btn-gold" onclick="showWinnerModal()">🏆 Winnaar</button>
+    <button class="btn btn-red" onclick="showEzelModal()">🐴 Ezel</button>
+    <button class="btn btn-red" onclick="clearAll()">🗑️ Clear All</button>
   </div>
 
-  <!-- Modals (rest van modal code blijft identiek zoals in eerdere voorbeelden) -->
+  <button id="floatButton" onclick="toggleFullscreen()" title="Volledig scherm">⛶</button>
 
-  <!-- ...Same modal and script logic as previously shown... -->
+  <!-- Modals -->
+  <div id="modalBackground" class="modal-background" onclick="closeHistoryModal(event)">
+    <div id="modal" class="modal-content" onclick="event.stopPropagation()">
+      <h3>📋 Historie <span id="modalPlayerName"></span></h3>
+      <div id="modalHistoryContainer"></div>
+      <button class="btn btn-green" onclick="closeHistoryModal()">✕ Sluiten</button>
+    </div>
+  </div>
+
+  <div id="winnerModal" class="modal-background" onclick="closeCelebrationModal(event)">
+    <div class="celebration-content modal-content" onclick="event.stopPropagation()">
+      <div class="winner-trophy">🏆</div>
+      <h2 class="celebration-title">Gefeliciteerd!</h2>
+      <div class="celebration-subtitle" id="winnerName">Winnaar</div>
+      <div style="font-size: 2em; margin-bottom: 30px;" id="winnerScore">-</div>
+      <button class="btn btn-gold" onclick="closeCelebrationModal()">🎉 Sluiten</button>
+    </div>
+  </div>
+
+  <div id="ezelModal" class="modal-background" onclick="closeCelebrationModal(event)">
+    <div class="celebration-content modal-content" onclick="event.stopPropagation()">
+      <div class="ezel-emoji">🐴</div>
+      <h2 class="celebration-title">Ezel van de dag!</h2>
+      <div class="celebration-subtitle" id="ezelName">Ezel</div>
+      <div style="font-size: 2em; margin-bottom: 30px;" id="ezelScore">-</div>
+      <button class="btn btn-red" onclick="closeCelebrationModal()">😅 Sluiten</button>
+    </div>
+  </div>
+
   <script>
     let players = [];
     let insertionCount = 0;
     let modalOpenForIndex = null;
+
+    function createConfetti() {
+      for (let i = 0; i < 100; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        confetti.style.animationDelay = Math.random() * 3 + 's';
+        confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 5000);
+      }
+    }
 
     window.onload = function () {
       const saved = localStorage.getItem('ezelplayers');
@@ -240,6 +361,19 @@
     }
 
     function addPlayer() {
+      addPlayerLogic();
+    }
+
+    // ENTER voor speler toevoegen
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('playerNameInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          addPlayerLogic();
+        }
+      });
+    });
+
+    function addPlayerLogic() {
       const input = document.getElementById('playerNameInput');
       const errorMsg = document.getElementById('playerError');
       const name = input.value.trim();
@@ -260,15 +394,13 @@
       renderTable();
     }
 
-    document.getElementById('playerNameInput').addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') addPlayer();
-    });
-
+    // Verwijderen via speler naam klik
     function removePlayer(index) {
       if (confirm(`Weet je zeker dat je speler "${players[index].name}" wilt verwijderen?`)) {
         players.splice(index, 1);
         savePlayers();
         renderTable();
+        closeHistoryModal();
       }
     }
 
@@ -313,11 +445,61 @@
       renderTable();
     }
 
+    function openHistoryModal(index) {
+      modalOpenForIndex = index;
+      const modal = document.getElementById('modal');
+      modal.innerHTML = `
+        <h3>📋 Historie <span id="modalPlayerName"></span></h3>
+        <div id="modalHistoryContainer"></div>
+        <button class="btn btn-green" onclick="closeHistoryModal()">✕ Sluiten</button>`;
+      const modalName = document.getElementById('modalPlayerName');
+      const container = document.getElementById('modalHistoryContainer');
+      modalName.textContent = players[index].name;
+      container.innerHTML = '';
+      if (players[index].history.length === 0) {
+        container.innerHTML = '<em>Geen score historie</em>';
+      } else {
+        players[index].history.forEach((pt,hIdx) => {
+          const div = document.createElement('div');
+          div.className = 'history-item';
+          div.innerHTML = `
+            <span>${pt} punten</span>
+            <button class="remove-history-btn" title="Verwijder deze punt" onclick="removeHistoryPoint(${index},${hIdx})">✖</button>`;
+          container.appendChild(div);
+        });
+      }
+      document.getElementById('modalBackground').style.display = 'flex';
+    }
+
+    function closeHistoryModal(e) {
+      if (e && e.target.id !== 'modalBackground') return;
+      document.getElementById('modalBackground').style.display = 'none';
+      modalOpenForIndex = null;
+    }
+
+    function closeCelebrationModal(e) {
+      document.getElementById('winnerModal').style.display = 'none';
+      document.getElementById('ezelModal').style.display = 'none';
+      document.querySelectorAll('.confetti').forEach(c => c.remove());
+    }
+
+    function removeHistoryPoint(pIdx, hIdx) {
+      if (confirm('Weet je zeker dat je deze puntentoevoeging wilt verwijderen?')) {
+        const pts = players[pIdx].history.splice(hIdx,1)[0];
+        players[pIdx].points -= pts;
+        if (players[pIdx].points < 0) players[pIdx].points = 0;
+        savePlayers();
+        renderTable();
+        if (modalOpenForIndex === pIdx) openHistoryModal(pIdx);
+      }
+    }
+
     function renderTable() {
       const tbody = document.getElementById('scoreBody');
       tbody.innerHTML = '';
       if (players.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 24px;"><em>Geen spelers toegevoegd</em></td></tr>';
+        tbody.innerHTML =
+          '<tr><td colspan="3" style="text-align: center; padding: 30px;"><em>Geen spelers toegevoegd</em></td></tr>';
         return;
       }
       players.forEach((p,i) => {
@@ -325,26 +507,61 @@
         const row = document.createElement('tr');
         row.innerHTML = `
           <td><span class="player-name" onclick="removePlayer(${i})" title="Tik om te verwijderen">${p.name}</span></td>
-          <td class="entry-count" title="Klik voor historie">${p.points} (${entries})</td>
+          <td class="entry-count" title="Klik voor historie" onclick="openHistoryModal(${i})">${p.points} (${entries})</td>
           <td class="input-action-cell">
             <input type="number" id="pointsInput-${i}" min="0" placeholder="0" />
-            <button onclick="addPoints(${i})">➕</button>
+            <button class="btn btn-green" onclick="addPoints(${i})">➕</button>
           </td>`;
         tbody.appendChild(row);
         document.getElementById(`pointsInput-${i}`).addEventListener('keydown', addAllPointsOnEnter);
       });
     }
 
-    function showWinnerModal() { /* ... */ }
-    function showEzelModal() { /* ... */ }
+    function showWinnerModal() {
+      if (players.length === 0) {
+        alert('Geen spelers.');
+        return;
+      }
+      let minPunten = Math.min(...players.map(p => p.points));
+      let winnaar = players.find(p => p.points === minPunten);
+      document.getElementById('winnerName').textContent = winnaar.name;
+      document.getElementById('winnerScore').textContent = `${winnaar.points} punten`;
+      document.getElementById('winnerModal').style.display = 'flex';
+      createConfetti();
+    }
+
+    function showEzelModal() {
+      if (players.length === 0) {
+        alert('Geen spelers.');
+        return;
+      }
+      let maxPunten = Math.max(...players.map(p => p.points));
+      let ezel = players.find(p => p.points === maxPunten);
+      document.getElementById('ezelName').textContent = ezel.name;
+      document.getElementById('ezelScore').textContent = `${ezel.points} punten`;
+      document.getElementById('ezelModal').style.display = 'flex';
+    }
+
     function sortPlayers(criteria) {
-      if (criteria === 'score') players.sort((a, b) => b.points - a.points);
-      else if (criteria === 'name') players.sort((a, b) => a.name.localeCompare(b.name));
-      else if (criteria === 'original') players.sort((a, b) => (a.insertionIndex ?? 0) - (b.insertionIndex ?? 0));
+      if (criteria === 'score') {
+        players.sort((a, b) => b.points - a.points);
+      } else if (criteria === 'name') {
+        players.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (criteria === 'original') {
+        players.sort((a, b) => (a.insertionIndex ?? 0) - (b.insertionIndex ?? 0));
+      }
       renderTable();
     }
-    function toggleFullscreen() { /* ... */ }
-    // Voeg indien nodig de overige modals/celebration functies toe zoals in eerdere code!
+
+    async function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        try { await document.documentElement.requestFullscreen(); }
+        catch(e) { console.log(e); }
+      } else {
+        try { await document.exitFullscreen(); }
+        catch(e) { console.log(e); }
+      }
+    }
   </script>
 </body>
 </html>
