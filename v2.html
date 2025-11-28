@@ -82,13 +82,15 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.08);
       padding: 12px 14px;
       margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
     }
+    /* bovenrij: naam links, rechts kolom met punten + input */
     .player-row {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
       gap: 8px;
-      margin-bottom: 8px;
     }
     .player-name {
       cursor: pointer;
@@ -100,6 +102,14 @@
     .player-name:hover {
       background: #ffeaa7;
     }
+
+    .player-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
     .player-points {
       cursor: pointer;
       color: #007bff;
@@ -109,10 +119,11 @@
     .player-points:hover {
       text-decoration: underline;
     }
+
     .player-input-row {
       display: flex;
-      gap: 8px;
-      align-items: center;
+      justify-content: flex-end;
+      width: 100%;
     }
     .player-input-row input[type="number"] {
       width: 70px;
@@ -122,6 +133,30 @@
       border: 2px solid #ddd;
       text-align: center;
     }
+
+    /* Buttons algemeen */
+    button.btn {
+      cursor: pointer;
+      padding: 14px 20px;
+      font-size: 1rem;
+      font-weight: 500;
+      border-radius: 8px;
+      border: none;
+      color: white;
+      min-height: 48px;
+      min-width: 80px;
+      touch-action: manipulation;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    button.btn:hover,
+    button.btn:active {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    .btn-green { background-color: #4CAF50; }
+    .btn-red   { background-color: #f44336; }
+    .btn-gold  { background-color: #FFD700; color: #333; }
 
     /* Actiebalk onderaan */
     #actionBar {
@@ -136,18 +171,12 @@
       justify-content: center;
     }
     #actionBar .btn {
-      cursor: pointer;
       flex: 1;
       min-width: 120px;
       padding: 12px 18px;
       font-size: 1.05rem;
       font-weight: 600;
-      border-radius: 10px;
-      border: none;
-      color: #fff;
     }
-    .btn-gold { background: #FFD700; color:#222; }
-    .btn-red { background: #f44336; }
 
     #floatButton {
       position: fixed; right: 20px; bottom: 20px;
@@ -159,6 +188,12 @@
       justify-content: center;
       user-select: none;
       cursor: pointer;
+    }
+
+    /* Keyboard open -> verberg vaste elementen */
+    body.keyboard-open #actionBar,
+    body.keyboard-open #floatButton {
+      display: none;
     }
 
     /* Modals */
@@ -408,12 +443,15 @@
     }
 
     function closeHistoryModal(e) {
-      if (e && e.target.id !== 'modalBackground') return;
+      if (e && e.target.id && e.target.id !== 'modalBackground') return;
       document.getElementById('modalBackground').style.display = 'none';
       modalOpenForIndex = null;
     }
 
     function closeCelebrationModal(e) {
+      if (e && e.target.classList && !e.target.classList.contains('modal-background')) {
+        if (e.target.closest('.modal-background') == null) return;
+      }
       document.getElementById('winnerModal').style.display = 'none';
       document.getElementById('ezelModal').style.display = 'none';
       document.querySelectorAll('.confetti').forEach(c => c.remove());
@@ -444,14 +482,24 @@
         card.innerHTML = `
           <div class="player-row">
             <span class="player-name" onclick="removePlayer(${i})" title="Tik om te verwijderen">${p.name}</span>
-            <span class="player-points" onclick="openHistoryModal(${i})" title="Klik voor historie">${p.points} (${entries})</span>
-          </div>
-          <div class="player-input-row">
-            <input type="number" id="pointsInput-${i}" min="0" placeholder="0" />
+            <div class="player-right">
+              <span class="player-points" onclick="openHistoryModal(${i})" title="Klik voor historie">
+                ${p.points} (${entries})
+              </span>
+              <div class="player-input-row">
+                <input type="number" id="pointsInput-${i}" min="0" placeholder="0" />
+              </div>
+            </div>
           </div>
         `;
         container.appendChild(card);
-        document.getElementById(`pointsInput-${i}`).addEventListener('keydown', addAllPointsOnEnter);
+        const inputEl = document.getElementById(`pointsInput-${i}`);
+        inputEl.addEventListener('keydown', addAllPointsOnEnter);
+        inputEl.addEventListener('focus', () => {
+          setTimeout(() => {
+            inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 250);
+        });
       });
     }
 
@@ -500,6 +548,18 @@
         catch(e) { console.log(e); }
       }
     }
+
+    /* keyboard open/close detectie voor mobile */
+    window.addEventListener('focusin', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        document.body.classList.add('keyboard-open');
+      }
+    });
+    window.addEventListener('focusout', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        document.body.classList.remove('keyboard-open');
+      }
+    });
   </script>
 </body>
 </html>
