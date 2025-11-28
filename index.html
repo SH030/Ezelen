@@ -2,15 +2,15 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Puntentelling Wie is de Ezel - Mobile Friendly</title>
   <style>
     * { box-sizing: border-box; }
-    body { 
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-      background: #f4f4f4; 
-      margin: 0; 
-      padding: 15px; 
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 15px;
       line-height: 1.5;
       font-size: 16px;
     }
@@ -18,76 +18,97 @@
     h3 { font-size: 1.3rem; margin: 0 0 15px 0; }
     
     #players { margin-bottom: 25px; }
-    #playerList {
-      display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;
-    }
-    #playerList span {
-      padding: 12px 18px;
-      background: #ddd;
-      border-radius: 25px;
-      cursor: pointer;
-      user-select: none;
-      font-size: 1rem;
-      font-weight: 500;
-      min-height: 44px;
-      display: flex; align-items: center;
-      touch-action: manipulation;
-    }
-    #playerList span:hover, #playerList span:active {
-      background: #bbb;
-    }
     
     /* Speler toevoegen: groter input, kleinere button */
     #players input[type="text"] {
       flex: 1;
       font-size: 1.1rem;
-      padding: 16px 20px; /* meer padding */
+      padding: 16px 20px;
       border-radius: 12px;
       border: 2px solid #ddd;
       min-height: 52px;
       margin-right: 12px;
     }
     #addPlayerBtn {
-      padding: 12px 16px !important; /* kleiner */
+      padding: 12px 16px !important;
       font-size: 1rem;
       min-height: 48px;
-      min-width: 70px !important; /* kleiner */
+      min-width: 70px !important;
       flex-shrink: 0;
     }
     
-    table { 
-      border-collapse: collapse; 
-      margin: 20px 0; 
-      background: #fff; 
+    table {
+      border-collapse: collapse;
+      margin: 20px 0;
+      background: #fff;
       width: 100%;
       font-size: 1rem;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       border-radius: 12px;
       overflow: hidden;
     }
-    th, td { 
-      padding: 15px 12px; 
-      border: 1px solid #ddd; 
+    th, td {
+      padding: 15px 12px;
+      border: 1px solid #ddd;
       text-align: left;
       min-height: 50px;
+      vertical-align: middle;
     }
-    th { 
-      background: #e3e3e3; 
+    th {
+      background: #e3e3e3;
       font-weight: 600;
     }
 
+    /* Aanklikbare speler naam */
+    .player-name {
+      cursor: pointer;
+      color: #333;
+      font-weight: 500;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      display: block;
+      user-select: none;
+    }
+    .player-name:hover, .player-name:active {
+      background: #ffeaa7;
+      color: #333;
+    }
+
     @media (max-width: 768px) {
-      table { font-size: 15px; margin: 15px 0; }
-      th, td {
-        padding: 12px 8px;
+      table {
         font-size: 14px;
-        min-height: 48px;
+        margin: 15px 0;
       }
-      th:nth-child(1), td:nth-child(1) { min-width: 90px; }
-      th:nth-child(2), td:nth-child(2) { min-width: 90px; }
-      th:nth-child(3), td:nth-child(3) { padding: 8px; }
-      
-      /* Mobile: speler input full width, button nog kleiner */
+      th, td {
+        padding: 8px 6px;
+        min-height: 40px;
+      }
+      th:nth-child(1), td:nth-child(1) {
+        min-width: 90px;
+        max-width: 120px;
+      }
+      th:nth-child(2), td:nth-child(2) {
+        min-width: 70px;
+        max-width: 90px;
+      }
+      /* Input+button kolom klein en naast score zonder omslaan */
+      th:nth-child(3), td:nth-child(3) {
+        min-width: 90px;
+        max-width: 100px;
+        white-space: nowrap;
+      }
+      .input-action-cell input {
+        width: 50px;
+        padding: 5px 6px;
+        font-size: 13px;
+      }
+      .input-action-cell button {
+        padding: 6px 8px;
+        min-width: 40px;
+        font-size: 13px;
+      }
+      /* Speler invoer responsive */
       #players input[type="text"] {
         margin-right: 8px;
         margin-bottom: 12px;
@@ -98,7 +119,7 @@
         min-width: auto !important;
       }
     }
-    
+
     .entry-count {
       cursor: pointer;
       text-align: center;
@@ -107,11 +128,12 @@
       padding: 15px;
       min-height: 50px;
       display: flex; align-items: center; justify-content: center;
+      user-select: none;
     }
     .entry-count:hover, .entry-count:active {
       background-color: #e7f3ff;
     }
-    
+
     .input-action-cell {
       display: flex;
       gap: 6px;
@@ -119,27 +141,12 @@
       padding: 8px;
     }
     .input-action-cell input {
-      width: 60px;
-      font-size: 1rem;
-      padding: 6px 8px;
       border-radius: 6px;
       border: 2px solid #ddd;
       min-height: 40px;
       text-align: center;
     }
-    .input-action-cell button {
-      padding: 10px 12px;
-      font-size: 1rem;
-      min-height: 40px;
-      min-width: 50px;
-      flex-shrink: 0;
-    }
-    @media (max-width: 768px) {
-      .input-action-cell { gap: 4px; padding: 6px; }
-      .input-action-cell input { padding: 6px 8px; font-size: 14px; width: 50px; }
-      .input-action-cell button { padding: 8px 10px; font-size: 14px; min-width: 44px; }
-    }
-    
+
     button.btn {
       cursor: pointer;
       padding: 14px 20px;
@@ -152,6 +159,7 @@
       min-width: 80px;
       touch-action: manipulation;
       transition: all 0.2s ease;
+      user-select: none;
     }
     button.btn:hover, button.btn:active {
       opacity: 0.9;
@@ -160,13 +168,13 @@
     button.btn-green { background-color: #4CAF50; }
     button.btn-red { background-color: #f44336; }
     button.btn-gold { background-color: #FFD700; color: #333; }
-    
+
     #sortControls {
       display: flex; flex-wrap: wrap; gap: 10px;
       margin: 20px 0; padding: 15px; background: white;
       border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
-    
+
     #actionBar {
       display: flex; flex-wrap: wrap; gap: 12px;
       margin: 25px 0; padding: 20px;
@@ -180,14 +188,15 @@
       font-size: 1.1rem; font-weight: 600;
       padding: 16px 24px;
     }
-    
+
     .remove-history-btn {
       color: #b33; background: none; border: none;
       font-size: 20px; width: 32px; height: 32px;
       cursor: pointer; border-radius: 50%; display: flex;
       align-items: center; justify-content: center;
+      user-select: none;
     }
-    
+
     #floatButton {
       position: fixed; right: 20px; bottom: 20px;
       background: linear-gradient(45deg, #007bff, #0056b3);
@@ -196,11 +205,12 @@
       box-shadow: 0 8px 25px rgba(0,0,0,0.3);
       z-index: 9999; display: flex; align-items: center;
       justify-content: center;
+      user-select: none;
     }
-    
-    /* Modals en animations blijven hetzelfde */
+
+    /* Modals en animaties */
     .modal-background {
-      display: none; position: fixed; top: 0; left: 0; 
+      display: none; position: fixed; top: 0; left: 0;
       width: 100vw; height: 100vh; background: rgba(0,0,0,0.7);
       justify-content: center; align-items: center; z-index: 1000;
       padding: 20px;
@@ -221,13 +231,13 @@
     .ezel-emoji { font-size: 7em; margin-bottom: 20px; animation: shake 1s infinite; }
     .celebration-title { font-size: 2.5em; margin: 0 0 10px 0; }
     .celebration-subtitle { font-size: 2em; margin-bottom: 20px; }
-    
+
     .history-item {
       margin-bottom: 15px; display: flex;
       justify-content: space-between; align-items: center;
       padding: 12px; background: #f8f9fa; border-radius: 8px;
     }
-    
+
     @keyframes bounceIn {
       0% { transform: scale(0.3); opacity: 0; }
       50% { transform: scale(1.05); }
@@ -252,13 +262,16 @@
 </head>
 <body>
   <h2>🎮 Wie is de Ezel</h2>
-  
-  <div id="players">
-    <h3>👥 Spelers (tik om te verwijderen)</h3>
-    <input type="text" id="playerNameInput" placeholder="Naam nieuwe speler..." />
-    <button id="addPlayerBtn" class="btn btn-green" onclick="addPlayer()">➕</button>
-    <p id="playerError" style="color: #f44336; margin: 8px 0 0 0; font-weight: 500;"></p>
-    <div id="playerList"></div>
+
+  <div id="players" style="display:flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 25px;">
+    <input
+      type="text"
+      id="playerNameInput"
+      placeholder="Naam nieuwe speler... (Enter)"
+      style="flex: 1; font-size: 1.1rem; padding: 16px 20px; border-radius: 12px; border: 2px solid #ddd; min-height: 52px; margin-right: 12px;"
+    />
+    <button id="addPlayerBtn" class="btn btn-green" style="padding: 12px 16px; min-height: 48px; min-width: 70px;" onclick="addPlayer()">➕</button>
+    <p id="playerError" style="color:#f44336; margin:8px 0 0 0; font-weight:500; width: 100%;"></p>
   </div>
 
   <div id="sortControls">
@@ -267,13 +280,13 @@
     <button class="btn btn-green" onclick="sortPlayers('original')">📋 Volgorde</button>
   </div>
 
-  <h3>📈 Scoreoverzicht</h3>
-  <table id="scoreTable">
+  <h3>📈 Scoreoverzicht <small>(tik speler naam om te verwijderen)</small></h3>
+  <table id="scoreTable" aria-label="Score overzicht spelers">
     <thead>
       <tr>
-        <th>👤 Speler</th>
-        <th>📊 Punten</th>
-        <th>➕ Nieuw + actie</th>
+        <th scope="col">👤 Speler</th>
+        <th scope="col">📊 Punten</th>
+        <th scope="col">➕ Nieuw + actie</th>
       </tr>
     </thead>
     <tbody id="scoreBody"></tbody>
@@ -287,7 +300,7 @@
 
   <button id="floatButton" onclick="toggleFullscreen()" title="Volledig scherm">⛶</button>
 
-  <!-- Modals blijven hetzelfde -->
+  <!-- Modals -->
   <div id="modalBackground" class="modal-background" onclick="closeHistoryModal(event)">
     <div id="modal" class="modal-content" onclick="event.stopPropagation()">
       <h3>📋 Historie <span id="modalPlayerName"></span></h3>
@@ -317,7 +330,6 @@
   </div>
 
   <script>
-    // JavaScript blijft identiek aan vorige versie
     let players = [];
     let insertionCount = 0;
     let modalOpenForIndex = null;
@@ -341,7 +353,6 @@
         players = JSON.parse(saved);
         insertionCount = players.reduce((max, p) => Math.max(max, p.insertionIndex ?? 0), -1) + 1;
       }
-      renderPlayers();
       renderTable();
     };
 
@@ -350,6 +361,19 @@
     }
 
     function addPlayer() {
+      addPlayerLogic();
+    }
+
+    // ENTER voor speler toevoegen
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('playerNameInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          addPlayerLogic();
+        }
+      });
+    });
+
+    function addPlayerLogic() {
       const input = document.getElementById('playerNameInput');
       const errorMsg = document.getElementById('playerError');
       const name = input.value.trim();
@@ -367,15 +391,14 @@
       players.push({ name, points: 0, history: [], insertionIndex: insertionCount++ });
       input.value = '';
       savePlayers();
-      renderPlayers();
       renderTable();
     }
 
-    function removePlayerByName(index) {
+    // Verwijderen via speler naam klik
+    function removePlayer(index) {
       if (confirm(`Weet je zeker dat je speler "${players[index].name}" wilt verwijderen?`)) {
         players.splice(index, 1);
         savePlayers();
-        renderPlayers();
         renderTable();
         closeHistoryModal();
       }
@@ -386,19 +409,7 @@
         players = [];
         insertionCount = 0;
         localStorage.removeItem('ezelplayers');
-        renderPlayers();
         renderTable();
-      }
-    }
-
-    function renderPlayers() {
-      const div = document.getElementById('playerList');
-      if (players.length === 0) {
-        div.innerHTML = '<em>Geen spelers toegevoegd.</em>';
-      } else {
-        div.innerHTML = players.map((p,i) =>
-          `<span title="Tik om te verwijderen" onclick="removePlayerByName(${i})">${p.name}</span>`
-        ).join('');
       }
     }
 
@@ -486,19 +497,23 @@
     function renderTable() {
       const tbody = document.getElementById('scoreBody');
       tbody.innerHTML = '';
+      if (players.length === 0) {
+        tbody.innerHTML =
+          '<tr><td colspan="3" style="text-align: center; padding: 30px;"><em>Geen spelers toegevoegd</em></td></tr>';
+        return;
+      }
       players.forEach((p,i) => {
         const entries = p.history.length;
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${p.name}</td>
+          <td><span class="player-name" onclick="removePlayer(${i})" title="Tik om te verwijderen">${p.name}</span></td>
           <td class="entry-count" title="Klik voor historie" onclick="openHistoryModal(${i})">${p.points} (${entries})</td>
           <td class="input-action-cell">
             <input type="number" id="pointsInput-${i}" min="0" placeholder="0" />
             <button class="btn btn-green" onclick="addPoints(${i})">➕</button>
           </td>`;
         tbody.appendChild(row);
-        document.getElementById(`pointsInput-${i}`)
-          .addEventListener('keydown', addAllPointsOnEnter);
+        document.getElementById(`pointsInput-${i}`).addEventListener('keydown', addAllPointsOnEnter);
       });
     }
 
@@ -535,7 +550,6 @@
       } else if (criteria === 'original') {
         players.sort((a, b) => (a.insertionIndex ?? 0) - (b.insertionIndex ?? 0));
       }
-      renderPlayers();
       renderTable();
     }
 
