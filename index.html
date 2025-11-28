@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Puntentelling Wie is de Ezel - Mobile Friendly</title>
+  <title>Puntentelling Wie is de Ezel - Cards</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -16,132 +16,125 @@
     }
     h2 { font-size: 1.8rem; margin: 0 0 20px 0; }
     h3 { font-size: 1.3rem; margin: 0 0 15px 0; }
-    
-    #players { margin-bottom: 25px; }
 
-    /* Speler toevoegen: groter input, kleinere button */
-    #players input[type="text"] {
+    /* Speler toevoegen */
+    #players {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: flex-end;
+      margin-bottom: 25px;
+    }
+    #playerNameInput {
       flex: 1;
       font-size: 1.1rem;
       padding: 16px 20px;
       border-radius: 12px;
       border: 2px solid #ddd;
       min-height: 52px;
-      margin-right: 12px;
     }
     #addPlayerBtn {
-      padding: 12px 16px !important;
+      padding: 12px 16px;
       font-size: 1rem;
       min-height: 48px;
-      min-width: 70px !important;
-      flex-shrink: 0;
+      min-width: 70px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background: #4CAF50;
+      color: #fff;
+      font-weight: 500;
     }
-    
-    table {
-      border-collapse: collapse;
-      margin: 20px 0;
-      background: #fff;
-      width: 100%;
-      font-size: 1rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    th, td {
-      padding: 15px 12px;
-      border: 1px solid #ddd;
-      text-align: left;
-      min-height: 50px;
-      vertical-align: middle;
-    }
-    th {
-      background: #e3e3e3;
-      font-weight: 600;
+    #addPlayerBtn:hover { opacity: 0.9; }
+    #playerError {
+      color:#f44336;
+      margin:8px 0 0 0;
+      font-weight:500;
+      width:100%;
     }
 
-    /* Aanklikbare speler naam */
+    /* Sort buttons */
+    #sortControls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 10px 0 20px 0;
+    }
+    #sortControls .btn {
+      cursor: pointer;
+      padding: 10px 16px;
+      font-size: 0.95rem;
+      border-radius: 8px;
+      border: none;
+      background: #4CAF50;
+      color: #fff;
+      font-weight: 500;
+    }
+    #sortControls .btn:hover { opacity: 0.9; }
+
+    /* PLAYER CARDS (ipv tabel) */
+    #scoreCards {
+      margin-top: 5px;
+    }
+    .player-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+    /* bovenrij: naam links, rechts kolom met punten + input */
+    .player-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
     .player-name {
       cursor: pointer;
-      color: #333;
-      font-weight: 500;
-      padding: 4px 8px;
+      font-weight: 600;
+      padding: 4px 6px;
       border-radius: 6px;
-      transition: all 0.2s ease;
-      display: block;
       user-select: none;
     }
-    .player-name:hover, .player-name:active {
+    .player-name:hover {
       background: #ffeaa7;
-      color: #333;
     }
 
-    @media (max-width: 768px) {
-      table {
-        font-size: 14px;
-        margin: 15px 0;
-      }
-      th, td {
-        padding: 8px 6px;
-        min-height: 40px;
-      }
-      th:nth-child(1), td:nth-child(1) {
-        min-width: 90px;
-        max-width: 120px;
-      }
-      th:nth-child(2), td:nth-child(2) {
-        min-width: 70px;
-        max-width: 90px;
-      }
-      th:nth-child(3), td:nth-child(3) {
-        min-width: 90px;
-        max-width: 100px;
-        white-space: nowrap;
-      }
-      .input-action-cell input {
-        width: 50px;
-        padding: 5px 6px;
-        font-size: 13px;
-      }
-
-      #players input[type="text"] {
-        margin-right: 8px;
-        margin-bottom: 12px;
-        width: 100%;
-      }
-      #addPlayerBtn {
-        width: 100%;
-        min-width: auto !important;
-      }
+    .player-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
     }
 
-    .entry-count {
+    .player-points {
       cursor: pointer;
-      text-align: center;
-      font-weight: bold;
       color: #007bff;
-      padding: 15px;
-      min-height: 50px;
-      display: flex; align-items: center; justify-content: center;
+      font-weight: 600;
       user-select: none;
     }
-    .entry-count:hover, .entry-count:active {
-      background-color: #e7f3ff;
+    .player-points:hover {
+      text-decoration: underline;
     }
 
-    .input-action-cell {
+    .player-input-row {
       display: flex;
-      align-items: center;
-      padding: 8px;
-      justify-content: center;
+      justify-content: flex-end;
+      width: 100%;
     }
-    .input-action-cell input {
-      border-radius: 6px;
+    .player-input-row input[type="number"] {
+      width: 70px;
+      padding: 6px 8px;
+      font-size: 0.95rem;
+      border-radius: 8px;
       border: 2px solid #ddd;
-      min-height: 40px;
       text-align: center;
-      width: 60px;
     }
 
+    /* Buttons algemeen */
     button.btn {
       cursor: pointer;
       padding: 14px 20px;
@@ -156,40 +149,33 @@
       transition: all 0.2s ease;
       user-select: none;
     }
-    button.btn:hover, button.btn:active {
+    button.btn:hover,
+    button.btn:active {
       opacity: 0.9;
       transform: translateY(-1px);
     }
-    button.btn-green { background-color: #4CAF50; }
-    button.btn-red { background-color: #f44336; }
-    button.btn-gold { background-color: #FFD700; color: #333; }
+    .btn-green { background-color: #4CAF50; }
+    .btn-red   { background-color: #f44336; }
+    .btn-gold  { background-color: #FFD700; color: #333; }
 
-    #sortControls {
-      display: flex; flex-wrap: wrap; gap: 10px;
-      margin: 20px 0; padding: 15px; background: white;
-      border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
+    /* Actiebalk onderaan */
     #actionBar {
-      display: flex; flex-wrap: wrap; gap: 12px;
-      margin: 25px 0; padding: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 25px 0 10px 0;
+      padding: 16px;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       border-radius: 16px;
       box-shadow: 0 8px 25px rgba(0,0,0,0.2);
       justify-content: center;
     }
     #actionBar .btn {
-      flex: 1; min-width: 140px;
-      font-size: 1.1rem; font-weight: 600;
-      padding: 16px 24px;
-    }
-
-    .remove-history-btn {
-      color: #b33; background: none; border: none;
-      font-size: 20px; width: 32px; height: 32px;
-      cursor: pointer; border-radius: 50%; display: flex;
-      align-items: center; justify-content: center;
-      user-select: none;
+      flex: 1;
+      min-width: 120px;
+      padding: 12px 18px;
+      font-size: 1.05rem;
+      font-weight: 600;
     }
 
     #floatButton {
@@ -201,8 +187,16 @@
       z-index: 9999; display: flex; align-items: center;
       justify-content: center;
       user-select: none;
+      cursor: pointer;
     }
 
+    /* Keyboard open -> verberg vaste elementen */
+    body.keyboard-open #actionBar,
+    body.keyboard-open #floatButton {
+      display: none;
+    }
+
+    /* Modals */
     .modal-background {
       display: none; position: fixed; top: 0; left: 0;
       width: 100vw; height: 100vh; background: rgba(0,0,0,0.7);
@@ -219,10 +213,9 @@
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white; padding: 40px 30px; border-radius: 20px;
       text-align: center; max-width: 90vw;
-      animation: bounceIn 0.6s ease;
     }
     .winner-trophy { font-size: 5em; margin-bottom: 20px; }
-    .ezel-emoji { font-size: 7em; margin-bottom: 20px; animation: shake 1s infinite; }
+    .ezel-emoji { font-size: 7em; margin-bottom: 20px; }
     .celebration-title { font-size: 2.5em; margin: 0 0 10px 0; }
     .celebration-subtitle { font-size: 2em; margin-bottom: 20px; }
 
@@ -231,18 +224,13 @@
       justify-content: space-between; align-items: center;
       padding: 12px; background: #f8f9fa; border-radius: 8px;
     }
+    .remove-history-btn {
+      color: #b33; background: none; border: none;
+      font-size: 20px; width: 32px; height: 32px;
+      cursor: pointer; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center;
+    }
 
-    @keyframes bounceIn {
-      0% { transform: scale(0.3); opacity: 0; }
-      50% { transform: scale(1.05); }
-      70% { transform: scale(0.9); }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    @keyframes shake {
-      0%, 100% { transform: rotate(0deg); }
-      25% { transform: rotate(-10deg); }
-      75% { transform: rotate(10deg); }
-    }
     .confetti {
       position: fixed; width: 12px; height: 12px;
       pointer-events: none; z-index: 1002;
@@ -252,48 +240,80 @@
       0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
       100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
     }
+
+    @media (max-width: 768px) {
+      body { font-size: 15px; }
+      .player-card { padding: 10px 12px; }
+      .player-input-row input[type="number"] {
+        width: 60px;
+      }
+    }
   </style>
 </head>
 <body>
   <h2>🎮 Wie is de Ezel</h2>
 
-  <div id="players" style="display:flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 25px;">
+  <!-- Spelers toevoegen -->
+  <div id="players">
     <input
       type="text"
       id="playerNameInput"
       placeholder="Naam nieuwe speler... (Enter)"
+      autocomplete="off"
     />
-    <button id="addPlayerBtn" class="btn btn-green" onclick="addPlayer()">➕</button>
+    <button id="addPlayerBtn" onclick="addPlayer()">➕</button>
     <p id="playerError"></p>
   </div>
 
+  <!-- Sorteren -->
   <div id="sortControls">
-    <button class="btn btn-green" onclick="sortPlayers('score')">📊 Score</button>
-    <button class="btn btn-green" onclick="sortPlayers('name')">🔤 Naam</button>
-    <button class="btn btn-green" onclick="sortPlayers('original')">📋 Volgorde</button>
+    <button class="btn" onclick="sortPlayers('score')" type="button">📊 Score</button>
+    <button class="btn" onclick="sortPlayers('name')" type="button">🔤 Naam</button>
+    <button class="btn" onclick="sortPlayers('original')" type="button">📋 Volgorde</button>
   </div>
 
   <h3>📈 Scoreoverzicht <small>(tik speler naam om te verwijderen)</small></h3>
-  <table id="scoreTable" aria-label="Score overzicht spelers">
-    <thead>
-      <tr>
-        <th scope="col">👤 Speler</th>
-        <th scope="col">📊 Punten</th>
-        <th scope="col">➕ Nieuw</th>
-      </tr>
-    </thead>
-    <tbody id="scoreBody"></tbody>
-  </table>
+  <div id="scoreCards"></div>
 
+  <!-- Actieknoppen onderaan -->
   <div id="actionBar">
-    <button class="btn btn-gold" onclick="showWinnerModal()">🏆 Winnaar</button>
-    <button class="btn btn-red" onclick="showEzelModal()">🐴 Ezel</button>
-    <button class="btn btn-red" onclick="clearAll()">🗑️ Clear All</button>
+    <button class="btn btn-gold" onclick="showWinnerModal()" type="button">🏆 Winnaar</button>
+    <button class="btn btn-red" onclick="showEzelModal()" type="button">🐴 Ezel</button>
+    <button class="btn btn-red" onclick="clearAll()" type="button">🗑️ Clear All</button>
   </div>
 
   <button id="floatButton" onclick="toggleFullscreen()" title="Volledig scherm">⛶</button>
 
-  <!-- Modals blijven identiek -->
+  <!-- Historie modal -->
+  <div id="modalBackground" class="modal-background" onclick="closeHistoryModal(event)">
+    <div id="modal" class="modal-content" onclick="event.stopPropagation()">
+      <h3>📋 Historie <span id="modalPlayerName"></span></h3>
+      <div id="modalHistoryContainer"></div>
+      <button class="btn btn-green" onclick="closeHistoryModal()">✕ Sluiten</button>
+    </div>
+  </div>
+
+  <!-- Winnaar modal -->
+  <div id="winnerModal" class="modal-background" onclick="closeCelebrationModal(event)">
+    <div class="celebration-content modal-content" onclick="event.stopPropagation()">
+      <div class="winner-trophy">🏆</div>
+      <h2 class="celebration-title">Gefeliciteerd!</h2>
+      <div class="celebration-subtitle" id="winnerName">Winnaar</div>
+      <div style="font-size: 2em; margin-bottom: 30px;" id="winnerScore">-</div>
+      <button class="btn btn-gold" onclick="closeCelebrationModal()">🎉 Sluiten</button>
+    </div>
+  </div>
+
+  <!-- Ezel modal -->
+  <div id="ezelModal" class="modal-background" onclick="closeCelebrationModal(event)">
+    <div class="celebration-content modal-content" onclick="event.stopPropagation()">
+      <div class="ezel-emoji">🐴</div>
+      <h2 class="celebration-title">Ezel van de dag!</h2>
+      <div class="celebration-subtitle" id="ezelName">Ezel</div>
+      <div style="font-size: 2em; margin-bottom: 30px;" id="ezelScore">-</div>
+      <button class="btn btn-red" onclick="closeCelebrationModal()">😅 Sluiten</button>
+    </div>
+  </div>
 
   <script>
     let players = [];
@@ -301,7 +321,7 @@
     let modalOpenForIndex = null;
 
     function createConfetti() {
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 80; i++) {
         const confetti = document.createElement('div');
         confetti.className = 'confetti';
         confetti.style.left = Math.random() * 100 + 'vw';
@@ -319,7 +339,7 @@
         players = JSON.parse(saved);
         insertionCount = players.reduce((max, p) => Math.max(max, p.insertionIndex ?? 0), -1) + 1;
       }
-      renderTable();
+      renderCards();
     };
 
     function savePlayers() {
@@ -357,14 +377,14 @@
       players.push({ name, points: 0, history: [], insertionIndex: insertionCount++ });
       input.value = '';
       savePlayers();
-      renderTable();
+      renderCards();
     }
 
     function removePlayer(index) {
       if (confirm(`Weet je zeker dat je speler "${players[index].name}" wilt verwijderen?`)) {
         players.splice(index, 1);
         savePlayers();
-        renderTable();
+        renderCards();
         closeHistoryModal();
       }
     }
@@ -374,22 +394,8 @@
         players = [];
         insertionCount = 0;
         localStorage.removeItem('ezelplayers');
-        renderTable();
+        renderCards();
       }
-    }
-
-    function addPoints(index) {
-      const input = document.getElementById('pointsInput-' + index);
-      if (!input) return;
-      const val = input.value.trim();
-      if (val === '') return;
-      const add = parseInt(val, 10);
-      if (isNaN(add) || add < 0) { input.value = ''; return; }
-      players[index].points += add;
-      players[index].history.push(add);
-      input.value = '';
-      savePlayers();
-      renderTable();
     }
 
     function addAllPointsOnEnter(event) {
@@ -407,7 +413,7 @@
         inp.value = '';
       });
       savePlayers();
-      renderTable();
+      renderCards();
     }
 
     function openHistoryModal(index) {
@@ -437,12 +443,15 @@
     }
 
     function closeHistoryModal(e) {
-      if (e && e.target.id !== 'modalBackground') return;
+      if (e && e.target.id && e.target.id !== 'modalBackground') return;
       document.getElementById('modalBackground').style.display = 'none';
       modalOpenForIndex = null;
     }
 
     function closeCelebrationModal(e) {
+      if (e && e.target.classList && !e.target.classList.contains('modal-background')) {
+        if (e.target.closest('.modal-background') == null) return;
+      }
       document.getElementById('winnerModal').style.display = 'none';
       document.getElementById('ezelModal').style.display = 'none';
       document.querySelectorAll('.confetti').forEach(c => c.remove());
@@ -454,30 +463,43 @@
         players[pIdx].points -= pts;
         if (players[pIdx].points < 0) players[pIdx].points = 0;
         savePlayers();
-        renderTable();
+        renderCards();
         if (modalOpenForIndex === pIdx) openHistoryModal(pIdx);
       }
     }
 
-    function renderTable() {
-      const tbody = document.getElementById('scoreBody');
-      tbody.innerHTML = '';
-      if (players.length === 0) {
-        tbody.innerHTML =
-          '<tr><td colspan="3" style="text-align: center; padding: 30px;"><em>Geen spelers toegevoegd</em></td></tr>';
+    function renderCards() {
+      const container = document.getElementById('scoreCards');
+      container.innerHTML = '';
+      if (!players.length) {
+        container.innerHTML = '<em>Geen spelers toegevoegd</em>';
         return;
       }
-      players.forEach((p,i) => {
+      players.forEach((p, i) => {
         const entries = p.history.length;
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td><span class="player-name" onclick="removePlayer(${i})" title="Tik om te verwijderen">${p.name}</span></td>
-          <td class="entry-count" title="Klik voor historie" onclick="openHistoryModal(${i})">${p.points} (${entries})</td>
-          <td class="input-action-cell">
-            <input type="number" id="pointsInput-${i}" min="0" placeholder="0" />
-          </td>`;
-        tbody.appendChild(row);
-        document.getElementById(`pointsInput-${i}`).addEventListener('keydown', addAllPointsOnEnter);
+        const card = document.createElement('div');
+        card.className = 'player-card';
+        card.innerHTML = `
+          <div class="player-row">
+            <span class="player-name" onclick="removePlayer(${i})" title="Tik om te verwijderen">${p.name}</span>
+            <div class="player-right">
+              <span class="player-points" onclick="openHistoryModal(${i})" title="Klik voor historie">
+                ${p.points} (${entries})
+              </span>
+              <div class="player-input-row">
+                <input type="number" id="pointsInput-${i}" min="0" placeholder="0" />
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+        const inputEl = document.getElementById(`pointsInput-${i}`);
+        inputEl.addEventListener('keydown', addAllPointsOnEnter);
+        inputEl.addEventListener('focus', () => {
+          setTimeout(() => {
+            inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 250);
+        });
       });
     }
 
@@ -514,7 +536,7 @@
       } else if (criteria === 'original') {
         players.sort((a, b) => (a.insertionIndex ?? 0) - (b.insertionIndex ?? 0));
       }
-      renderTable();
+      renderCards();
     }
 
     async function toggleFullscreen() {
@@ -526,6 +548,18 @@
         catch(e) { console.log(e); }
       }
     }
+
+    /* keyboard open/close detectie voor mobile */
+    window.addEventListener('focusin', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        document.body.classList.add('keyboard-open');
+      }
+    });
+    window.addEventListener('focusout', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        document.body.classList.remove('keyboard-open');
+      }
+    });
   </script>
 </body>
 </html>
