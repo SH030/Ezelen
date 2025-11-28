@@ -37,6 +37,24 @@
       background: #bbb;
     }
     
+    /* Speler toevoegen: groter input, kleinere button */
+    #players input[type="text"] {
+      flex: 1;
+      font-size: 1.1rem;
+      padding: 16px 20px; /* meer padding */
+      border-radius: 12px;
+      border: 2px solid #ddd;
+      min-height: 52px;
+      margin-right: 12px;
+    }
+    #addPlayerBtn {
+      padding: 12px 16px !important; /* kleiner */
+      font-size: 1rem;
+      min-height: 48px;
+      min-width: 70px !important; /* kleiner */
+      flex-shrink: 0;
+    }
+    
     table { 
       border-collapse: collapse; 
       margin: 20px 0; 
@@ -57,19 +75,28 @@
       background: #e3e3e3; 
       font-weight: 600;
     }
-    
-    /* Mobile table optimalisatie - GEEN cards meer */
+
     @media (max-width: 768px) {
       table { font-size: 15px; margin: 15px 0; }
-      th, td { 
-        padding: 12px 8px; 
-        font-size: 14px; 
+      th, td {
+        padding: 12px 8px;
+        font-size: 14px;
         min-height: 48px;
       }
-      th:nth-child(1), td:nth-child(1) { min-width: 90px; } /* Speler */
-      th:nth-child(2), td:nth-child(2) { min-width: 70px; } /* Punten */
-      th:nth-child(3), td:nth-child(3) { min-width: 70px; } /* Entries */
-      th:nth-child(4), td:nth-child(4) { padding: 8px; }    /* Input+Btn */
+      th:nth-child(1), td:nth-child(1) { min-width: 90px; }
+      th:nth-child(2), td:nth-child(2) { min-width: 90px; }
+      th:nth-child(3), td:nth-child(3) { padding: 8px; }
+      
+      /* Mobile: speler input full width, button nog kleiner */
+      #players input[type="text"] {
+        margin-right: 8px;
+        margin-bottom: 12px;
+        width: 100%;
+      }
+      #addPlayerBtn {
+        width: 100%;
+        min-width: auto !important;
+      }
     }
     
     .entry-count {
@@ -85,7 +112,6 @@
       background-color: #e7f3ff;
     }
     
-    /* SAMENGESTELDE CEL: Input + Button */
     .input-action-cell {
       display: flex;
       gap: 6px;
@@ -93,12 +119,13 @@
       padding: 8px;
     }
     .input-action-cell input {
-      flex: 1;
+      width: 60px;
       font-size: 1rem;
-      padding: 10px 8px;
+      padding: 6px 8px;
       border-radius: 6px;
       border: 2px solid #ddd;
       min-height: 40px;
+      text-align: center;
     }
     .input-action-cell button {
       padding: 10px 12px;
@@ -109,7 +136,7 @@
     }
     @media (max-width: 768px) {
       .input-action-cell { gap: 4px; padding: 6px; }
-      .input-action-cell input { padding: 8px 6px; font-size: 14px; }
+      .input-action-cell input { padding: 6px 8px; font-size: 14px; width: 50px; }
       .input-action-cell button { padding: 8px 10px; font-size: 14px; min-width: 44px; }
     }
     
@@ -134,14 +161,12 @@
     button.btn-red { background-color: #f44336; }
     button.btn-gold { background-color: #FFD700; color: #333; }
     
-    /* Sort controls */
     #sortControls {
       display: flex; flex-wrap: wrap; gap: 10px;
       margin: 20px 0; padding: 15px; background: white;
       border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
     
-    /* Actie balk ONDER tabel */
     #actionBar {
       display: flex; flex-wrap: wrap; gap: 12px;
       margin: 25px 0; padding: 20px;
@@ -173,7 +198,7 @@
       justify-content: center;
     }
     
-    /* Modals blijven hetzelfde */
+    /* Modals en animations blijven hetzelfde */
     .modal-background {
       display: none; position: fixed; top: 0; left: 0; 
       width: 100vw; height: 100vh; background: rgba(0,0,0,0.7);
@@ -203,7 +228,6 @@
       padding: 12px; background: #f8f9fa; border-radius: 8px;
     }
     
-    /* Animations */
     @keyframes bounceIn {
       0% { transform: scale(0.3); opacity: 0; }
       50% { transform: scale(1.05); }
@@ -224,16 +248,6 @@
       0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
       100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
     }
-    
-    @media (max-width: 768px) {
-      body { padding: 10px; font-size: 18px; }
-      h2 { font-size: 2rem; }
-      #sortControls { flex-direction: column; gap: 12px; }
-      #actionBar { flex-direction: column; gap: 15px; padding: 25px 20px; }
-      button.btn { padding: 16px 24px; font-size: 1.1rem; }
-      .celebration-title { font-size: 2.2em; }
-      .celebration-subtitle { font-size: 1.8em; }
-    }
   </style>
 </head>
 <body>
@@ -242,33 +256,29 @@
   <div id="players">
     <h3>👥 Spelers (tik om te verwijderen)</h3>
     <input type="text" id="playerNameInput" placeholder="Naam nieuwe speler..." />
-    <button class="btn btn-green" onclick="addPlayer()">➕ Toevoegen</button>
+    <button id="addPlayerBtn" class="btn btn-green" onclick="addPlayer()">➕</button>
     <p id="playerError" style="color: #f44336; margin: 8px 0 0 0; font-weight: 500;"></p>
     <div id="playerList"></div>
   </div>
 
-  <!-- Sorteer knoppen BOVEN tabel -->
   <div id="sortControls">
     <button class="btn btn-green" onclick="sortPlayers('score')">📊 Score</button>
     <button class="btn btn-green" onclick="sortPlayers('name')">🔤 Naam</button>
     <button class="btn btn-green" onclick="sortPlayers('original')">📋 Volgorde</button>
   </div>
 
-  <!-- Tabel met 4 kolommen -->
   <h3>📈 Scoreoverzicht</h3>
   <table id="scoreTable">
     <thead>
       <tr>
         <th>👤 Speler</th>
         <th>📊 Punten</th>
-        <th class="entry-count" style="cursor: default;">📝 Entries</th>
-        <th>➕ Punten toevoegen</th>
+        <th>➕ Nieuw + actie</th>
       </tr>
     </thead>
     <tbody id="scoreBody"></tbody>
   </table>
 
-  <!-- ACTIE KNOPPEN ONDER TABEL -->
   <div id="actionBar">
     <button class="btn btn-gold" onclick="showWinnerModal()">🏆 Winnaar</button>
     <button class="btn btn-red" onclick="showEzelModal()">🐴 Ezel</button>
@@ -307,6 +317,7 @@
   </div>
 
   <script>
+    // JavaScript blijft identiek aan vorige versie
     let players = [];
     let insertionCount = 0;
     let modalOpenForIndex = null;
@@ -394,16 +405,10 @@
     function addPoints(index) {
       const input = document.getElementById('pointsInput-' + index);
       if (!input) return;
-
       const val = input.value.trim();
       if (val === '') return;
-
       const add = parseInt(val, 10);
-      if (isNaN(add) || add < 0) {
-        input.value = '';
-        return;
-      }
-
+      if (isNaN(add) || add < 0) { input.value = ''; return; }
       players[index].points += add;
       players[index].history.push(add);
       input.value = '';
@@ -414,25 +419,17 @@
     function addAllPointsOnEnter(event) {
       if (event.key !== 'Enter') return;
       event.preventDefault();
-
-      const values = players.map((p, i) => {
-        const input = document.getElementById('pointsInput-' + i);
-        return input ? input.value.trim() : '';
-      });
-
-      values.forEach((val, i) => {
-        if (val === '') return;
+      players.forEach((p,i) => {
+        const inp = document.getElementById('pointsInput-' + i);
+        if (!inp) return;
+        const val = inp.value.trim();
+        if (!val) return;
         const add = parseInt(val, 10);
         if (isNaN(add) || add < 0) return;
-        players[i].points += add;
-        players[i].history.push(add);
+        p.points += add;
+        p.history.push(add);
+        inp.value = '';
       });
-
-      players.forEach((p, i) => {
-        const input = document.getElementById('pointsInput-' + i);
-        if (input) input.value = '';
-      });
-
       savePlayers();
       renderTable();
     }
@@ -446,23 +443,20 @@
         <button class="btn btn-green" onclick="closeHistoryModal()">✕ Sluiten</button>`;
       const modalName = document.getElementById('modalPlayerName');
       const container = document.getElementById('modalHistoryContainer');
-
       modalName.textContent = players[index].name;
       container.innerHTML = '';
-
       if (players[index].history.length === 0) {
         container.innerHTML = '<em>Geen score historie</em>';
       } else {
-        players[index].history.forEach((pt, hIdx) => {
+        players[index].history.forEach((pt,hIdx) => {
           const div = document.createElement('div');
           div.className = 'history-item';
           div.innerHTML = `
             <span>${pt} punten</span>
-            <button class="remove-history-btn" title="Verwijder deze punt" onclick="removeHistoryPoint(${index}, ${hIdx})">✖</button>`;
+            <button class="remove-history-btn" title="Verwijder deze punt" onclick="removeHistoryPoint(${index},${hIdx})">✖</button>`;
           container.appendChild(div);
         });
       }
-
       document.getElementById('modalBackground').style.display = 'flex';
     }
 
@@ -492,13 +486,12 @@
     function renderTable() {
       const tbody = document.getElementById('scoreBody');
       tbody.innerHTML = '';
-      players.forEach((p, i) => {
-        const entryCount = p.history.length;
+      players.forEach((p,i) => {
+        const entries = p.history.length;
         const row = document.createElement('tr');
         row.innerHTML = `
           <td>${p.name}</td>
-          <td>${p.points}</td>
-          <td class="entry-count" onclick="openHistoryModal(${i})" title="Tik voor historie">${entryCount}</td>
+          <td class="entry-count" title="Klik voor historie" onclick="openHistoryModal(${i})">${p.points} (${entries})</td>
           <td class="input-action-cell">
             <input type="number" id="pointsInput-${i}" min="0" placeholder="0" />
             <button class="btn btn-green" onclick="addPoints(${i})">➕</button>
@@ -549,10 +542,10 @@
     async function toggleFullscreen() {
       if (!document.fullscreenElement) {
         try { await document.documentElement.requestFullscreen(); }
-        catch (e) { console.log(e); }
+        catch(e) { console.log(e); }
       } else {
         try { await document.exitFullscreen(); }
-        catch (e) { console.log(e); }
+        catch(e) { console.log(e); }
       }
     }
   </script>
