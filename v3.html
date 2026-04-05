@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Puntentelling Wie is de Ezel - Cards</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 15px;
+      line-height: 1.5;
+      font-size: 16px;
+    }
+    h2 { font-size: 1.8rem; margin: 0 0 20px 0; }
+    h3 { font-size: 1.3rem; margin: 0 0 15px 0; }
+
+    #players {
+      margin-bottom: 25px;
+    }
+    #presetBtn {
+      padding: 0;
+      font-size: 1.6rem;
+      width: 64px;
+      height: 44px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      background: #4CAF50;
+      color: #fff;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    #presetBtn:hover { opacity: 0.9; }
+    #addPlayerBtn {
+      padding: 12px 16px;
+      font-size: 1rem;
+      min-height: 48px;
+      min-width: 48px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background: #4CAF50;
+      color: #fff;
+      font-weight: 500;
+    }
+    #addPlayerBtn:hover { opacity: 0.9; }
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .preset-name-btn {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 2px solid #ddd;
+      background: #f8f9fa;
+      font-size: 1rem;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+    }
+    .preset-name-btn:hover { background: #e3f2fd; border-color: #90caf9; }
+    .preset-name-btn.already-added {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: #f0f0f0;
+    }
+    #playerError {
+      color:#f44336;
+      margin:8px 0 0 0;
+      font-weight:500;
+      width:100%;
+    }
+
+    #sortControls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 10px 0 20px 0;
+    }
+    #sortControls .btn {
+      cursor: pointer;
+      padding: 10px 16px;
+      font-size: 0.95rem;
+      border-radius: 8px;
+      border: none;
+      background: #4CAF50;
+      color: #fff;
+      font-weight: 500;
+    }
+    #sortControls .btn:hover { opacity: 0.9; }
+
+    #scoreCards { margin-top: 5px; }
+
+    /* ── Player card ── */
+    .player-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      padding: 12px 14px;
+      margin-bottom: 4px;   /* tighter: diff connector sits between */
+      display: flex;
+      flex-direction: column;
+    }
+    .player-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .player-name {
+      cursor: pointer;
+      font-weight: 600;
+      padding: 4px 6px;
+      border-radius: 6px;
+      user-select: none;
+    }
+    .player-name:hover { background: #ffeaa7; }
+
+    .player-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+    .player-points {
+      cursor: pointer;
+      color: #007bff;
+      font-weight: 600;
+      user-select: none;
+    }
+    .player-points:hover { text-decoration: underline; }
+
+    .player-input-row { display: flex; justify-content: flex-end; width: 100%; }
+    .player-input-row input[type="number"] {
+      width: 70px;
+      padding: 6px 8px;
+      font-size: 0.95rem;
+      border-radius: 8px;
+      border: 2px solid #ddd;
+      text-align: center;
+    }
+
+    /* ── Diff connector ── */
+    .diff-connector {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 18px;
+      height: 22px;
+      margin-bottom: 4px;
+    }
+    .diff-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 2px 9px;
+      border-radius: 20px;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+    /* positive diff = this player has MORE points (worse) */
+    .diff-badge.worse {
+      background: #ffeaea;
+      color: #c0392b;
+      border: 1px solid #f5c6c6;
+    }
+    /* negative diff = this player has FEWER points (better) */
+    .diff-badge.better {
+      background: #e9f7ef;
+      color: #1a7a3e;
+      border: 1px solid #b2dfcc;
+    }
+    /* zero */
+    .diff-badge.equal {
+      background: #f0f0f0;
+      color: #666;
+      border: 1px solid #ddd;
+    }
+    .diff-arrow {
+      font-size: 0.7rem;
+    }
+
+    /* Buttons */
+    button.btn {
+      cursor: pointer;
+      padding: 14px 20px;
+      font-size: 1rem;
+      font-weight: 500;
+      border-radius: 8px;
+      border: none;
+      color: white;
+      min-height: 48px;
+      min-width: 80px;
+      touch-action: manipulation;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    button.btn:hover, button.btn:active { opacity: 0.9; transform: translateY(-1px); }
+    .btn-green { background-color: #4CAF50; }
+    .btn-red   { background-color: #f44336; }
+    .btn-gold  { background-color: #FFD700; color: #333; }
+
+    #actionBar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 25px 0 10px 0;
+      padding: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+      justify-content: center;
+    }
+    #actionBar .btn {
+      flex: 1;
+      min-width: 120px;
+      padding: 12px 18px;
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    #floatButton {
+      position: fixed; right: 20px; bottom: 20px;
+      background: linear-gradient(45deg, #007bff, #0056b3);
+      color: white; border: none; border-radius: 50%;
+      width: 70px; height: 70px; font-size: 1.8em;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      z-index: 9999; display: flex; align-items: center;
+      justify-content: center;
+      user-select: none;
+      cursor: pointer;
+    }
+
+    body.keyboard-open #actionBar,
+    body.keyboard-open #floatButton { display: none; }
+
+    .modal-background {
+      display: none; position: fixed; top: 0; left: 0;
+      width: 100vw; height: 100vh; background: rgba(0,0,0,0.7);
+      justify-content: center; align-items: center; z-index: 1000;
+      padding: 20px;
+    }
+    .modal-content {
+      background: white; border-radius: 16px;
+      max-width: 95vw; max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+    #modal { padding: 25px; font-size: 1.1rem; }
+    .celebration-content {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white; padding: 40px 30px; border-radius: 20px;
+      text-align: center; max-width: 90vw;
+    }
+    .winner-trophy { font-size: 5em; margin-bottom: 20px; }
+    .ezel-emoji { font-size: 7em; margin-bottom: 20px; }
+    .celebration-title { font-size: 2.5em; margin: 0 0 10px 0; }
+    .celebration-subtitle { font-size: 2em; margin-bottom: 20px; }
+
+    .history-item {
+      margin-bottom: 15px; display: flex;
+      justify-content: space-between; align-items: center;
+      padding: 12px; background: #f8f9fa; border-radius: 8px;
+    }
+    .remove-history-btn {
+      color: #b33; background: none; border: none;
+      font-size: 20px; width: 32px; height: 32px;
+      cursor: pointer; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center;
+    }
+
+    .confetti {
+      position: fixed; width: 12px; height: 12px;
+      pointer-events: none; z-index: 1002;
+      animation: confetti-fall 3s linear infinite;
+    }
+    @keyframes confetti-fall {
+      0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    @media (max-width: 768px) {
+      body { font-size: 15px; }
+      .player-card { padding: 10px 12px; }
+      .player-input-row input[type="number"] { width: 60px; }
+    }
+  </style>
+</head>
+<body>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2 style="margin: 0;">Wie is de Ezel</h2>
+    <button id="presetBtn" onclick="openPresetModal()">👥＋</button>
+  </div>
+
+  <div id="players">
+    <p id="playerError"></p>
+  </div>
+
+  <!-- Spelers toevoegen modal -->
+  <div id="presetModal" class="modal-background" onclick="closePresetModal(event)">
+    <div class="modal-content" style="padding: 25px; width: 90vw; max-width: 460px;" onclick="event.stopPropagation()">
+      <h3 style="margin: 0 0 6px 0;">👥 Speler toevoegen</h3>
+      <p style="margin: 0 0 14px 0; font-size: 0.9rem; color: #666;">Kies uit de lijst of typ een eigen naam.</p>
+
+      <!-- Custom name input -->
+      <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+        <input
+          type="text"
+          id="playerNameInput"
+          placeholder="Eigen naam... (Enter)"
+          autocomplete="off"
+          style="flex: 1; font-size: 1rem; padding: 12px 14px; border-radius: 10px; border: 2px solid #ddd;"
+        />
+        <button id="addPlayerBtn" onclick="addPlayer()">➕</button>
+      </div>
+      <p id="playerError" style="color:#f44336; margin: -14px 0 14px 0; font-weight:500; font-size:0.9rem;"></p>
+
+      <!-- Preset grid -->
+      <div class="preset-grid" id="presetGrid"></div>
+
+      <button class="btn btn-green" onclick="closePresetModal()" style="width: 100%; margin-top: 4px;">✕ Sluiten</button>
+    </div>
+  </div>
+
+  <div id="sortControls">
+    <button class="btn" onclick="sortPlayers('original')" type="button">📋 Volgorde</button>
+    <button class="btn" onclick="sortPlayers('name')" type="button">🔤 Naam</button>
+    <button class="btn" onclick="sortPlayers('score')" type="button" data-sort="score">📊 Score</button>
+  </div>
+
+  <h3>📈 Scoreoverzicht <small>(tik naam om te bewerken)</small></h3>
+  <div id="scoreCards"></div>
+
+  <div id="actionBar">
+    <button class="btn btn-gold" onclick="showWinnerModal()" type="button">🏆 Winnaar</button>
+    <button class="btn btn-red" onclick="showEzelModal()" type="button">🐴 Ezel</button>
+    <button class="btn btn-red" onclick="clearAll()" type="button">🗑️ Clear All</button>
+  </div>
+
+  <button id="floatButton" onclick="toggleFullscreen()" title="Volledig scherm">⛶</button>
+
+  <div id="modalBackground" class="modal-background" onclick="closeHistoryModal(event)">
+    <div id="modal" class="modal-content" onclick="event.stopPropagation()">
+      <h3>📋 Historie <span id="modalPlayerName"></span></h3>
+      <div id="modalHistoryContainer"></div>
+      <button class="btn btn-green" onclick="closeHistoryModal()">✕ Sluiten</button>
+    </div>
+  </div>
+
+  <!-- Speler bewerken modal -->
+  <div id="editPlayerModal" class="modal-background" onclick="closeEditPlayerModal(event)">
+    <div class="modal-content" style="padding: 25px; min-width: 280px; max-width: 400px; width: 90vw;" onclick="event.stopPropagation()">
+      <h3 style="margin: 0 0 18px 0;">✏️ Speler bewerken</h3>
+      <label style="font-size: 0.95rem; color: #555; display: block; margin-bottom: 6px;">Naam</label>
+      <input
+        type="text"
+        id="editPlayerNameInput"
+        style="width: 100%; font-size: 1.1rem; padding: 12px 14px; border-radius: 10px; border: 2px solid #ddd; margin-bottom: 20px;"
+        autocomplete="off"
+      />
+      <p id="editPlayerError" style="color:#f44336; margin: -12px 0 14px 0; font-weight: 500; font-size: 0.9rem;"></p>
+      <div id="editMainButtons" style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="btn btn-green" style="flex: 1;" onclick="savePlayerName()">💾 Opslaan</button>
+        <button class="btn btn-red" style="flex: 1;" onclick="askDeleteConfirm()">🗑️ Verwijderen</button>
+        <button class="btn" style="flex: 1; background: #888;" onclick="closeEditPlayerModal()">✕ Annuleren</button>
+      </div>
+      <div id="editConfirmRow" style="display: none; flex-direction: column; gap: 10px;">
+        <p style="margin: 0 0 6px 0; font-weight: 500; color: #c0392b;">Zeker weten? Dit kan niet ongedaan worden gemaakt.</p>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-red" style="flex: 1;" onclick="deletePlayerConfirmed()">✔ Ja, verwijder</button>
+          <button class="btn" style="flex: 1; background: #888;" onclick="cancelDelete()">✕ Annuleren</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="winnerModal" class="modal-background" onclick="closeCelebrationModal(event)">
+    <div class="celebration-content modal-content" onclick="event.stopPropagation()">
+      <div class="winner-trophy">🏆</div>
+      <h2 class="celebration-title">Gefeliciteerd!</h2>
+      <div class="celebration-subtitle" id="winnerName">Winnaar</div>
+      <div style="font-size: 2em; margin-bottom: 30px;" id="winnerScore">-</div>
+      <button class="btn btn-gold" onclick="closeCelebrationModal()">🎉 Sluiten</button>
+    </div>
+  </div>
+
+  <div id="ezelModal" class="modal-background" onclick="closeCelebrationModal(event)">
+    <div class="celebration-content modal-content" onclick="event.stopPropagation()">
+      <div class="ezel-emoji">🐴</div>
+      <h2 class="celebration-title">Ezel van de dag!</h2>
+      <div class="celebration-subtitle" id="ezelName">Ezel</div>
+      <div style="font-size: 2em; margin-bottom: 30px;" id="ezelScore">-</div>
+      <button class="btn btn-red" onclick="closeCelebrationModal()">😅 Sluiten</button>
+    </div>
+  </div>
+
+  <script>
+    let players = [];
+    let insertionCount = 0;
+    let modalOpenForIndex = null;
+    let scoreSortAsc = true;
+    let editPlayerIndex = null;
+
+    const PRESET_NAMES = [
+      'Evelien', 'Hilde', 'Maarten', 'Manon', 'Sander', 'Sasha', 'Yärnn'
+    ];
+
+    function refreshPresetGrid() {
+      const grid = document.getElementById('presetGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      PRESET_NAMES.forEach(name => {
+        const alreadyAdded = players.some(p => p.name.toLowerCase() === name.toLowerCase());
+        const btn = document.createElement('button');
+        btn.className = 'preset-name-btn' + (alreadyAdded ? ' already-added' : '');
+        btn.textContent = name;
+        btn.disabled = alreadyAdded;
+        btn.onclick = () => {
+          players.push({ name, points: 0, history: [], insertionIndex: insertionCount++ });
+          savePlayers();
+          renderCards();
+          btn.classList.add('already-added');
+          btn.disabled = true;
+        };
+        grid.appendChild(btn);
+      });
+    }
+
+    function openPresetModal() {
+      refreshPresetGrid();
+      document.getElementById('presetModal').style.display = 'flex';
+      setTimeout(() => document.getElementById('playerNameInput').focus(), 100);
+    }
+
+    function closePresetModal(e) {
+      if (e && e.target.id !== 'presetModal') return;
+      document.getElementById('presetModal').style.display = 'none';
+    }
+
+    function createConfetti() {
+      for (let i = 0; i < 80; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        confetti.style.animationDelay = Math.random() * 3 + 's';
+        confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 5000);
+      }
+    }
+
+    window.onload = function () {
+      const saved = localStorage.getItem('ezelplayers');
+      if (saved) {
+        players = JSON.parse(saved);
+        insertionCount = players.reduce((max, p) => Math.max(max, p.insertionIndex ?? 0), -1) + 1;
+      }
+      renderCards();
+    };
+
+    function savePlayers() {
+      localStorage.setItem('ezelplayers', JSON.stringify(players));
+    }
+
+    function addPlayer() { addPlayerLogic(); }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('playerNameInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); addPlayerLogic(); }
+      });
+      document.getElementById('editPlayerNameInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); savePlayerName(); }
+      });
+    });
+
+    function addPlayerLogic() {
+      const input = document.getElementById('playerNameInput');
+      const errorMsg = document.getElementById('playerError');
+      const name = input.value.trim();
+      if (!name) { errorMsg.textContent = 'Naam mag niet leeg zijn.'; return; }
+      if (players.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+        errorMsg.textContent = 'Naam moet uniek zijn.'; return;
+      }
+      errorMsg.textContent = '';
+      players.push({ name, points: 0, history: [], insertionIndex: insertionCount++ });
+      input.value = '';
+      savePlayers();
+      renderCards();
+      refreshPresetGrid();
+    }
+
+    function removePlayer(index) {
+      if (confirm(`Weet je zeker dat je speler "${players[index].name}" wilt verwijderen?`)) {
+        players.splice(index, 1);
+        savePlayers();
+        renderCards();
+        closeHistoryModal();
+      }
+    }
+
+    function openEditPlayerModal(index) {
+      editPlayerIndex = index;
+      document.getElementById('editPlayerNameInput').value = players[index].name;
+      document.getElementById('editPlayerError').textContent = '';
+      document.getElementById('editConfirmRow').style.display = 'none';
+      document.getElementById('editMainButtons').style.display = 'flex';
+      document.getElementById('editPlayerModal').style.display = 'flex';
+      setTimeout(() => document.getElementById('editPlayerNameInput').focus(), 100);
+    }
+
+    function closeEditPlayerModal(e) {
+      if (e && e.target.id !== 'editPlayerModal') return;
+      document.getElementById('editPlayerModal').style.display = 'none';
+      editPlayerIndex = null;
+    }
+
+    function savePlayerName() {
+      const input = document.getElementById('editPlayerNameInput');
+      const errorMsg = document.getElementById('editPlayerError');
+      const newName = input.value.trim();
+      if (!newName) { errorMsg.textContent = 'Naam mag niet leeg zijn.'; return; }
+      if (players.some((p, i) => p.name.toLowerCase() === newName.toLowerCase() && i !== editPlayerIndex)) {
+        errorMsg.textContent = 'Naam moet uniek zijn.'; return;
+      }
+      players[editPlayerIndex].name = newName;
+      savePlayers();
+      renderCards();
+      document.getElementById('editPlayerModal').style.display = 'none';
+      editPlayerIndex = null;
+    }
+
+    function askDeleteConfirm() {
+      document.getElementById('editMainButtons').style.display = 'none';
+      document.getElementById('editConfirmRow').style.display = 'flex';
+    }
+
+    function deletePlayerConfirmed() {
+      players.splice(editPlayerIndex, 1);
+      savePlayers();
+      renderCards();
+      document.getElementById('editPlayerModal').style.display = 'none';
+      editPlayerIndex = null;
+    }
+
+    function cancelDelete() {
+      document.getElementById('editConfirmRow').style.display = 'none';
+      document.getElementById('editMainButtons').style.display = 'flex';
+    }
+
+    function clearAll() {
+      if (confirm('Weet je zeker dat je ALLE spelers en hun scores wilt verwijderen? Dit kan niet ongedaan gemaakt worden.')) {
+        players = [];
+        insertionCount = 0;
+        localStorage.removeItem('ezelplayers');
+        renderCards();
+      }
+    }
+
+    function addAllPointsOnEnter(event) {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      players.forEach((p, i) => {
+        const inp = document.getElementById('pointsInput-' + i);
+        if (!inp) return;
+        const val = inp.value.trim();
+        if (!val) return;
+        const add = parseInt(val, 10);
+        if (isNaN(add) || add < 0) return;
+        p.points += add;
+        p.history.push(add);
+        inp.value = '';
+      });
+      savePlayers();
+      renderCards();
+    }
+
+    function openHistoryModal(index) {
+      modalOpenForIndex = index;
+      const modal = document.getElementById('modal');
+      modal.innerHTML = `
+        <h3>📋 Historie <span id="modalPlayerName"></span></h3>
+        <div id="modalHistoryContainer"></div>
+        <button class="btn btn-green" onclick="closeHistoryModal()">✕ Sluiten</button>`;
+      document.getElementById('modalPlayerName').textContent = players[index].name;
+      const container = document.getElementById('modalHistoryContainer');
+      container.innerHTML = '';
+      if (players[index].history.length === 0) {
+        container.innerHTML = '<em>Geen score historie</em>';
+      } else {
+        players[index].history.forEach((pt, hIdx) => {
+          const div = document.createElement('div');
+          div.className = 'history-item';
+          div.innerHTML = `
+            <span>${pt} punten</span>
+            <button class="remove-history-btn" title="Verwijder deze punt" onclick="removeHistoryPoint(${index},${hIdx})">✖</button>`;
+          container.appendChild(div);
+        });
+      }
+      document.getElementById('modalBackground').style.display = 'flex';
+    }
+
+    function closeHistoryModal(e) {
+      if (e && e.target.id && e.target.id !== 'modalBackground') return;
+      document.getElementById('modalBackground').style.display = 'none';
+      modalOpenForIndex = null;
+    }
+
+    function closeCelebrationModal(e) {
+      if (e && e.target.classList && !e.target.classList.contains('modal-background')) {
+        if (e.target.closest('.modal-background') == null) return;
+      }
+      document.getElementById('winnerModal').style.display = 'none';
+      document.getElementById('ezelModal').style.display = 'none';
+      document.querySelectorAll('.confetti').forEach(c => c.remove());
+    }
+
+    function removeHistoryPoint(pIdx, hIdx) {
+      if (confirm('Weet je zeker dat je deze puntentoevoeging wilt verwijderen?')) {
+        const pts = players[pIdx].history.splice(hIdx, 1)[0];
+        players[pIdx].points -= pts;
+        if (players[pIdx].points < 0) players[pIdx].points = 0;
+        savePlayers();
+        renderCards();
+        if (modalOpenForIndex === pIdx) openHistoryModal(pIdx);
+      }
+    }
+
+    /* ── Build diff badge HTML ── */
+    function diffBadgeHTML(diff) {
+      if (diff === 0) {
+        return `<span class="diff-badge equal">= gelijk</span>`;
+      } else if (diff > 0) {
+        /* this player has MORE points = worse in Ezel (lower is better) */
+        return `<span class="diff-badge worse">▲ +${diff}</span>`;
+      } else {
+        return `<span class="diff-badge better">▼ ${diff}</span>`;
+      }
+    }
+
+    function renderCards() {
+      const container = document.getElementById('scoreCards');
+      container.innerHTML = '';
+      if (!players.length) {
+        container.innerHTML = '<em>Geen spelers toegevoegd</em>';
+        return;
+      }
+      players.forEach((p, i) => {
+        const entries = p.history.length;
+
+        /* ── Diff connector between cards ── */
+        if (i > 0) {
+          const diff = p.points - players[i - 1].points;
+          const connectorDiv = document.createElement('div');
+          connectorDiv.className = 'diff-connector';
+          connectorDiv.innerHTML = diffBadgeHTML(diff);
+          container.appendChild(connectorDiv);
+        }
+
+        const card = document.createElement('div');
+        card.className = 'player-card';
+        card.innerHTML = `
+          <div class="player-row">
+            <span class="player-name" onclick="openEditPlayerModal(${i})" title="Tik om te bewerken">${p.name}</span>
+            <div class="player-right">
+              <span class="player-points" onclick="openHistoryModal(${i})" title="Klik voor historie">
+                ${p.points} (${entries})
+              </span>
+              <div class="player-input-row">
+                <input type="number" id="pointsInput-${i}" min="0" placeholder="0" />
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+
+        const inputEl = document.getElementById(`pointsInput-${i}`);
+        inputEl.addEventListener('keydown', addAllPointsOnEnter);
+        inputEl.addEventListener('focus', () => {
+          setTimeout(() => inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' }), 250);
+        });
+      });
+    }
+
+    function showWinnerModal() {
+      if (players.length === 0) { alert('Geen spelers.'); return; }
+      let minPunten = Math.min(...players.map(p => p.points));
+      let winnaar = players.find(p => p.points === minPunten);
+      document.getElementById('winnerName').textContent = winnaar.name;
+      document.getElementById('winnerScore').textContent = `${winnaar.points} punten`;
+      document.getElementById('winnerModal').style.display = 'flex';
+      createConfetti();
+    }
+
+    function showEzelModal() {
+      if (players.length === 0) { alert('Geen spelers.'); return; }
+      let maxPunten = Math.max(...players.map(p => p.points));
+      let ezel = players.find(p => p.points === maxPunten);
+      document.getElementById('ezelName').textContent = ezel.name;
+      document.getElementById('ezelScore').textContent = `${ezel.points} punten`;
+      document.getElementById('ezelModal').style.display = 'flex';
+    }
+
+    function sortPlayers(criteria) {
+      const scoreBtn = document.querySelector('#sortControls .btn[data-sort="score"]');
+      if (criteria === 'score') {
+        players.sort((a, b) => scoreSortAsc ? a.points - b.points : b.points - a.points);
+        if (scoreBtn) scoreBtn.textContent = scoreSortAsc ? '📊 Score ↑' : '📊 Score ↓';
+        scoreSortAsc = !scoreSortAsc;
+      } else if (criteria === 'name') {
+        players.sort((a, b) => a.name.localeCompare(b.name));
+        scoreSortAsc = true;
+        if (scoreBtn) scoreBtn.textContent = '📊 Score';
+      } else if (criteria === 'original') {
+        players.sort((a, b) => (a.insertionIndex ?? 0) - (b.insertionIndex ?? 0));
+        scoreSortAsc = true;
+        if (scoreBtn) scoreBtn.textContent = '📊 Score';
+      }
+      renderCards();
+    }
+
+    async function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        try { await document.documentElement.requestFullscreen(); } catch(e) {}
+      } else {
+        try { await document.exitFullscreen(); } catch(e) {}
+      }
+    }
+
+    window.addEventListener('focusin', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')
+        document.body.classList.add('keyboard-open');
+    });
+    window.addEventListener('focusout', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')
+        document.body.classList.remove('keyboard-open');
+    });
+  </script>
+</body>
+</html>
