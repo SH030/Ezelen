@@ -121,8 +121,11 @@
       padding: 4px 6px;
       border-radius: 6px;
       user-select: none;
+      color: #007bff;
+      text-decoration: underline;
+      text-underline-offset: 2px;
     }
-    .player-name:hover { background: #ffeaa7; }
+    .player-name:hover { color: #0056b3; background: #e8f0fe; }
 
     .player-right {
       display: flex;
@@ -229,20 +232,7 @@
       font-weight: 600;
     }
 
-    #floatButton {
-      position: fixed; right: 20px; bottom: 20px;
-      background: linear-gradient(45deg, #007bff, #0056b3);
-      color: white; border: none; border-radius: 50%;
-      width: 70px; height: 70px; font-size: 1.8em;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-      z-index: 9999; display: flex; align-items: center;
-      justify-content: center;
-      user-select: none;
-      cursor: pointer;
-    }
 
-    body.keyboard-open #actionBar,
-    body.keyboard-open #floatButton { display: none; }
 
     .modal-background {
       display: none; position: fixed; top: 0; left: 0;
@@ -255,7 +245,19 @@
       max-width: 95vw; max-height: 90vh; overflow-y: auto;
       box-shadow: 0 20px 40px rgba(0,0,0,0.3);
     }
-    #modal { padding: 25px; font-size: 1.1rem; }
+    #modal { padding: 25px; font-size: 1.1rem; width: 95vw; max-width: 95vw; }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px;
+    }
+    .modal-header h3 { margin: 0; }
+    .modal-close-x {
+      background: none; border: none; cursor: pointer;
+      font-size: 1.4rem; line-height: 1; color: #888;
+      padding: 4px 6px; border-radius: 6px;
+      flex-shrink: 0;
+    }
+    .modal-close-x:hover { background: #f0f0f0; color: #333; }
     .celebration-content {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white; padding: 40px 30px; border-radius: 20px;
@@ -267,9 +269,23 @@
     .celebration-subtitle { font-size: 2em; margin-bottom: 20px; }
 
     .history-item {
-      margin-bottom: 15px; display: flex;
+      margin-bottom: 10px; display: flex;
       justify-content: space-between; align-items: center;
-      padding: 12px; background: #f8f9fa; border-radius: 8px;
+      gap: 8px; padding: 10px 12px; background: #f8f9fa; border-radius: 8px;
+    }
+    .history-item-label { flex: 1; font-size: 1rem; }
+    .history-item-edit {
+      display: flex; align-items: center; gap: 6px; flex: 1;
+    }
+    .history-item-edit input[type="number"] {
+      width: 70px; padding: 5px 8px; font-size: 0.95rem;
+      border-radius: 8px; border: 2px solid #4CAF50; text-align: center;
+    }
+    .edit-history-btn {
+      color: #1a7a3e; background: none; border: none;
+      font-size: 18px; width: 32px; height: 32px;
+      cursor: pointer; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center;
     }
     .remove-history-btn {
       color: #b33; background: none; border: none;
@@ -308,7 +324,10 @@
   <!-- Spelers toevoegen modal -->
   <div id="presetModal" class="modal-background" onclick="closePresetModal(event)">
     <div class="modal-content" style="padding: 25px; width: 90vw; max-width: 460px;" onclick="event.stopPropagation()">
-      <h3 style="margin: 0 0 6px 0;">👥 Speler toevoegen</h3>
+      <div class="modal-header">
+        <h3>👥 Speler toevoegen</h3>
+        <button class="modal-close-x" onclick="closePresetModal()">✕</button>
+      </div>
       <p style="margin: 0 0 14px 0; font-size: 0.9rem; color: #666;">Kies uit de lijst of typ een eigen naam.</p>
 
       <!-- Custom name input -->
@@ -316,7 +335,7 @@
         <input
           type="text"
           id="playerNameInput"
-          placeholder="Eigen naam... (Enter)"
+          placeholder="Andere naam... (Enter)"
           autocomplete="off"
           style="flex: 1; font-size: 1rem; padding: 12px 14px; border-radius: 10px; border: 2px solid #ddd;"
         />
@@ -326,8 +345,6 @@
 
       <!-- Preset grid -->
       <div class="preset-grid" id="presetGrid"></div>
-
-      <button class="btn btn-green" onclick="closePresetModal()" style="width: 100%; margin-top: 4px;">✕ Sluiten</button>
     </div>
   </div>
 
@@ -337,7 +354,7 @@
     <button class="btn" onclick="sortPlayers('score')" type="button" data-sort="score">📊 Score</button>
   </div>
 
-  <h3>📈 Scoreoverzicht <small>(tik naam om te bewerken)</small></h3>
+  <h3 id="scoreHeader">📈 Scoreoverzicht</h3>
   <div id="scoreCards"></div>
 
   <div id="actionBar">
@@ -346,7 +363,19 @@
     <button class="btn btn-red" onclick="clearAll()" type="button">🗑️ Clear All</button>
   </div>
 
-  <button id="floatButton" onclick="toggleFullscreen()" title="Volledig scherm">⛶</button>
+  <!-- Clear All bevestiging modal -->
+  <div id="clearAllModal" class="modal-background" onclick="cancelClearAll(event)">
+    <div class="modal-content" style="padding: 25px; width: 90vw; max-width: 380px;" onclick="event.stopPropagation()">
+      <h3 style="margin: 0 0 12px 0;">🗑️ Clear All</h3>
+      <p style="margin: 0 0 20px 0; color: #555;">Weet je zeker dat je <strong>alle spelers en scores</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.</p>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-red" style="flex: 1;" onclick="clearAllConfirmed()">✔ Ja, verwijder alles</button>
+        <button class="btn" style="flex: 1; background: #888;" onclick="cancelClearAll()">✕ Annuleren</button>
+      </div>
+    </div>
+  </div>
+
+
 
   <div id="modalBackground" class="modal-background" onclick="closeHistoryModal(event)">
     <div id="modal" class="modal-content" onclick="event.stopPropagation()">
@@ -359,7 +388,10 @@
   <!-- Speler bewerken modal -->
   <div id="editPlayerModal" class="modal-background" onclick="closeEditPlayerModal(event)">
     <div class="modal-content" style="padding: 25px; min-width: 280px; max-width: 400px; width: 90vw;" onclick="event.stopPropagation()">
-      <h3 style="margin: 0 0 18px 0;">✏️ Speler bewerken</h3>
+      <div class="modal-header">
+        <h3>✏️ Speler bewerken</h3>
+        <button class="modal-close-x" onclick="closeEditPlayerModal()">✕</button>
+      </div>
       <label style="font-size: 0.95rem; color: #555; display: block; margin-bottom: 6px;">Naam</label>
       <input
         type="text"
@@ -368,10 +400,11 @@
         autocomplete="off"
       />
       <p id="editPlayerError" style="color:#f44336; margin: -12px 0 14px 0; font-weight: 500; font-size: 0.9rem;"></p>
-      <div id="editMainButtons" style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <button class="btn btn-green" style="flex: 1;" onclick="savePlayerName()">💾 Opslaan</button>
-        <button class="btn btn-red" style="flex: 1;" onclick="askDeleteConfirm()">🗑️ Verwijderen</button>
-        <button class="btn" style="flex: 1; background: #888;" onclick="closeEditPlayerModal()">✕ Annuleren</button>
+      <div id="editMainButtons" style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-green" style="flex: 1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:10px;" onclick="savePlayerName()"><span>💾</span><span style="font-size:0.85rem;">Opslaan</span></button>
+          <button class="btn btn-red" style="flex: 1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:10px;" onclick="askDeleteConfirm()"><span>🗑️</span><span style="font-size:0.85rem;">Verwijderen</span></button>
+        </div>
       </div>
       <div id="editConfirmRow" style="display: none; flex-direction: column; gap: 10px;">
         <p style="margin: 0 0 6px 0; font-weight: 500; color: #c0392b;">Zeker weten? Dit kan niet ongedaan worden gemaakt.</p>
@@ -438,7 +471,6 @@
     function openPresetModal() {
       refreshPresetGrid();
       document.getElementById('presetModal').style.display = 'flex';
-      setTimeout(() => document.getElementById('playerNameInput').focus(), 100);
     }
 
     function closePresetModal(e) {
@@ -519,7 +551,7 @@
     }
 
     function closeEditPlayerModal(e) {
-      if (e && e.target.id !== 'editPlayerModal') return;
+      if (e && e.target && e.target.id !== 'editPlayerModal') return;
       document.getElementById('editPlayerModal').style.display = 'none';
       editPlayerIndex = null;
     }
@@ -558,24 +590,52 @@
     }
 
     function clearAll() {
-      if (confirm('Weet je zeker dat je ALLE spelers en hun scores wilt verwijderen? Dit kan niet ongedaan gemaakt worden.')) {
-        players = [];
-        insertionCount = 0;
-        localStorage.removeItem('ezelplayers');
-        renderCards();
-      }
+      document.getElementById('clearAllModal').style.display = 'flex';
+    }
+
+    function clearAllConfirmed() {
+      players = [];
+      insertionCount = 0;
+      localStorage.removeItem('ezelplayers');
+      renderCards();
+      document.getElementById('clearAllModal').style.display = 'none';
+    }
+
+    function cancelClearAll(e) {
+      if (e && e.target.id !== 'clearAllModal') return;
+      document.getElementById('clearAllModal').style.display = 'none';
     }
 
     function addAllPointsOnEnter(event) {
       if (event.key !== 'Enter') return;
       event.preventDefault();
+
+      // Check all inputs are filled with a valid non-negative number
+      const missing = players.some((p, i) => {
+        const inp = document.getElementById('pointsInput-' + i);
+        if (!inp) return false;
+        const val = inp.value.trim();
+        const num = parseInt(val, 10);
+        return !val || isNaN(num) || num < 0;
+      });
+
+      if (missing) {
+        // Highlight empty inputs
+        players.forEach((p, i) => {
+          const inp = document.getElementById('pointsInput-' + i);
+          if (!inp) return;
+          const val = inp.value.trim();
+          if (!val || isNaN(parseInt(val, 10)) || parseInt(val, 10) < 0) {
+            inp.style.borderColor = '#f44336';
+            setTimeout(() => { inp.style.borderColor = ''; }, 1500);
+          }
+        });
+        return;
+      }
+
       players.forEach((p, i) => {
         const inp = document.getElementById('pointsInput-' + i);
-        if (!inp) return;
-        const val = inp.value.trim();
-        if (!val) return;
-        const add = parseInt(val, 10);
-        if (isNaN(add) || add < 0) return;
+        const add = parseInt(inp.value.trim(), 10);
         p.points += add;
         p.history.push(add);
         inp.value = '';
@@ -588,25 +648,91 @@
       modalOpenForIndex = index;
       const modal = document.getElementById('modal');
       modal.innerHTML = `
-        <h3>📋 Historie <span id="modalPlayerName"></span></h3>
+        <div class="modal-header">
+          <h3>📋 Historie <span id="modalPlayerName"></span></h3>
+          <button class="modal-close-x" onclick="closeHistoryModal()">✕</button>
+        </div>
         <div id="modalHistoryContainer"></div>
-        <button class="btn btn-green" onclick="closeHistoryModal()">✕ Sluiten</button>`;
+        <div style="display:flex; gap:8px; margin-top:16px; overflow:hidden;">
+          <input type="number" id="modalAddInput" min="0" placeholder="Score toevoegen..." style="flex:1; min-width:0; width:0; font-size:1rem; padding:10px 12px; border-radius:10px; border:2px solid #ddd; box-sizing:border-box;" />
+          <button class="btn btn-green" style="padding:10px 14px; flex-shrink:0;" onclick="addHistoryFromModal()">➕</button>
+        </div>
+        <p id="modalAddError" style="color:#f44336; margin:6px 0 0 0; font-size:0.9rem; font-weight:500;"></p>`;
       document.getElementById('modalPlayerName').textContent = players[index].name;
+      document.getElementById('modalAddInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); addHistoryFromModal(); }
+      });
+      renderHistoryItems(index);
+      document.getElementById('modalBackground').style.display = 'flex';
+    }
+
+    function addHistoryFromModal() {
+      const inp = document.getElementById('modalAddInput');
+      const err = document.getElementById('modalAddError');
+      const val = parseInt(inp.value, 10);
+      if (isNaN(val) || val < 0) { err.textContent = 'Vul een geldig getal in.'; return; }
+      err.textContent = '';
+      players[modalOpenForIndex].history.push(val);
+      players[modalOpenForIndex].points += val;
+      inp.value = '';
+      savePlayers();
+      renderCards();
+      renderHistoryItems(modalOpenForIndex);
+    }
+
+    function renderHistoryItems(pIdx) {
       const container = document.getElementById('modalHistoryContainer');
       container.innerHTML = '';
-      if (players[index].history.length === 0) {
+      if (players[pIdx].history.length === 0) {
         container.innerHTML = '<em>Geen score historie</em>';
-      } else {
-        players[index].history.forEach((pt, hIdx) => {
-          const div = document.createElement('div');
-          div.className = 'history-item';
-          div.innerHTML = `
-            <span>${pt} punten</span>
-            <button class="remove-history-btn" title="Verwijder deze punt" onclick="removeHistoryPoint(${index},${hIdx})">✖</button>`;
-          container.appendChild(div);
-        });
+        return;
       }
-      document.getElementById('modalBackground').style.display = 'flex';
+      players[pIdx].history.forEach((pt, hIdx) => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.id = `histItem-${hIdx}`;
+        div.innerHTML = `
+          <span class="history-item-label" id="histLabel-${hIdx}">${pt} punten</span>
+          <div id="histActions-${hIdx}" style="display:flex; align-items:center; gap:4px;">
+            <button class="edit-history-btn" title="Aanpassen" onclick="startEditHistory(${pIdx},${hIdx})">✏️</button>
+            <button class="remove-history-btn" title="Verwijder" onclick="askRemoveHistory(${pIdx},${hIdx})">✖</button>
+          </div>
+          <div id="histConfirm-${hIdx}" style="display:none; align-items:center; gap:6px;">
+            <span style="font-size:0.85rem; color:#c0392b; font-weight:500;">Verwijderen?</span>
+            <button class="edit-history-btn" title="Ja" onclick="removeHistoryPoint(${pIdx},${hIdx})" style="color:#1a7a3e;">✔</button>
+            <button class="remove-history-btn" title="Nee" onclick="cancelRemoveHistory(${hIdx})">✖</button>
+          </div>`;
+        container.appendChild(div);
+      });
+    }
+
+    function startEditHistory(pIdx, hIdx) {
+      const label = document.getElementById(`histLabel-${hIdx}`);
+      const currentVal = players[pIdx].history[hIdx];
+      label.outerHTML = `
+        <div class="history-item-edit" id="histLabel-${hIdx}">
+          <input type="number" id="histEditInput-${hIdx}" min="0" value="${currentVal}" />
+          <button class="edit-history-btn" title="Opslaan" onclick="saveEditHistory(${pIdx},${hIdx})">💾</button>
+        </div>`;
+      const inp = document.getElementById(`histEditInput-${hIdx}`);
+      inp.focus();
+      inp.select();
+      inp.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); saveEditHistory(pIdx, hIdx); }
+        if (e.key === 'Escape') renderHistoryItems(pIdx);
+      });
+    }
+
+    function saveEditHistory(pIdx, hIdx) {
+      const inp = document.getElementById(`histEditInput-${hIdx}`);
+      const newVal = parseInt(inp.value, 10);
+      if (isNaN(newVal) || newVal < 0) { inp.style.borderColor = '#f44336'; return; }
+      const oldVal = players[pIdx].history[hIdx];
+      players[pIdx].history[hIdx] = newVal;
+      players[pIdx].points = players[pIdx].history.reduce((sum, v) => sum + v, 0);
+      savePlayers();
+      renderCards();
+      renderHistoryItems(pIdx);
     }
 
     function closeHistoryModal(e) {
@@ -624,15 +750,22 @@
       document.querySelectorAll('.confetti').forEach(c => c.remove());
     }
 
+    function askRemoveHistory(pIdx, hIdx) {
+      document.getElementById(`histActions-${hIdx}`).style.display = 'none';
+      document.getElementById(`histConfirm-${hIdx}`).style.display = 'flex';
+    }
+
+    function cancelRemoveHistory(hIdx) {
+      document.getElementById(`histConfirm-${hIdx}`).style.display = 'none';
+      document.getElementById(`histActions-${hIdx}`).style.display = 'flex';
+    }
+
     function removeHistoryPoint(pIdx, hIdx) {
-      if (confirm('Weet je zeker dat je deze puntentoevoeging wilt verwijderen?')) {
-        const pts = players[pIdx].history.splice(hIdx, 1)[0];
-        players[pIdx].points -= pts;
-        if (players[pIdx].points < 0) players[pIdx].points = 0;
-        savePlayers();
-        renderCards();
-        if (modalOpenForIndex === pIdx) openHistoryModal(pIdx);
-      }
+      players[pIdx].history.splice(hIdx, 1);
+      players[pIdx].points = players[pIdx].history.reduce((sum, v) => sum + v, 0);
+      savePlayers();
+      renderCards();
+      renderHistoryItems(pIdx);
     }
 
     /* ── Build diff badge HTML ── */
@@ -650,12 +783,21 @@
     function renderCards() {
       const container = document.getElementById('scoreCards');
       container.innerHTML = '';
+
+      // Update header with round count
+      const rounds = players.length ? Math.max(...players.map(p => p.history.length)) : 0;
+      const header = document.getElementById('scoreHeader');
+      if (header) {
+        if (rounds === 0) header.innerHTML = '📈 Scoreoverzicht';
+        else if (rounds === 1) header.innerHTML = '📈 Scoreoverzicht <small>(1 ronde)</small>';
+        else header.innerHTML = `📈 Scoreoverzicht <small>(${rounds} rondes)</small>`;
+      }
+
       if (!players.length) {
         container.innerHTML = '<em>Geen spelers toegevoegd</em>';
         return;
       }
       players.forEach((p, i) => {
-        const entries = p.history.length;
 
         /* ── Diff connector between cards ── */
         if (i > 0) {
@@ -673,7 +815,7 @@
             <span class="player-name" onclick="openEditPlayerModal(${i})" title="Tik om te bewerken">${p.name}</span>
             <div class="player-right">
               <span class="player-points" onclick="openHistoryModal(${i})" title="Klik voor historie">
-                ${p.points} (${entries})
+                ${p.points} (${p.history.length})
               </span>
               <div class="player-input-row">
                 <input type="number" id="pointsInput-${i}" min="0" placeholder="0" />
@@ -693,20 +835,30 @@
 
     function showWinnerModal() {
       if (players.length === 0) { alert('Geen spelers.'); return; }
-      let minPunten = Math.min(...players.map(p => p.points));
-      let winnaar = players.find(p => p.points === minPunten);
-      document.getElementById('winnerName').textContent = winnaar.name;
-      document.getElementById('winnerScore').textContent = `${winnaar.points} punten`;
+      const minPunten = Math.min(...players.map(p => p.points));
+      const winnaars = players.filter(p => p.points === minPunten);
+      const nameEl = document.getElementById('winnerName');
+      if (winnaars.length === 1) {
+        nameEl.textContent = winnaars[0].name;
+      } else {
+        nameEl.innerHTML = winnaars.map(w => `<div>${w.name}</div>`).join('');
+      }
+      document.getElementById('winnerScore').textContent = `${minPunten} punten`;
       document.getElementById('winnerModal').style.display = 'flex';
       createConfetti();
     }
 
     function showEzelModal() {
       if (players.length === 0) { alert('Geen spelers.'); return; }
-      let maxPunten = Math.max(...players.map(p => p.points));
-      let ezel = players.find(p => p.points === maxPunten);
-      document.getElementById('ezelName').textContent = ezel.name;
-      document.getElementById('ezelScore').textContent = `${ezel.points} punten`;
+      const maxPunten = Math.max(...players.map(p => p.points));
+      const ezels = players.filter(p => p.points === maxPunten);
+      const nameEl = document.getElementById('ezelName');
+      if (ezels.length === 1) {
+        nameEl.textContent = ezels[0].name;
+      } else {
+        nameEl.innerHTML = ezels.map(e => `<div>${e.name}</div>`).join('');
+      }
+      document.getElementById('ezelScore').textContent = `${maxPunten} punten`;
       document.getElementById('ezelModal').style.display = 'flex';
     }
 
@@ -726,14 +878,6 @@
         if (scoreBtn) scoreBtn.textContent = '📊 Score';
       }
       renderCards();
-    }
-
-    async function toggleFullscreen() {
-      if (!document.fullscreenElement) {
-        try { await document.documentElement.requestFullscreen(); } catch(e) {}
-      } else {
-        try { await document.exitFullscreen(); } catch(e) {}
-      }
     }
 
     window.addEventListener('focusin', (e) => {
