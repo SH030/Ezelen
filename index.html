@@ -13,31 +13,36 @@
       padding: 15px;
       line-height: 1.5;
       font-size: 16px;
+      position: relative;
     }
     h2 { font-size: 1.8rem; margin: 0 0 20px 0; }
     h3 { font-size: 1.3rem; margin: 0 0 15px 0; }
 
-    /* Speler toevoegen */
     #players {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: flex-end;
       margin-bottom: 25px;
     }
-    #playerNameInput {
-      flex: 1;
-      font-size: 1.1rem;
-      padding: 16px 20px;
-      border-radius: 12px;
-      border: 2px solid #ddd;
-      min-height: 52px;
+    #presetBtn {
+      padding: 0;
+      font-size: 1.6rem;
+      width: 64px;
+      height: 44px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      background: #4CAF50;
+      color: #fff;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
     }
+    #presetBtn:hover { opacity: 0.9; }
     #addPlayerBtn {
       padding: 12px 16px;
       font-size: 1rem;
       min-height: 48px;
-      min-width: 70px;
+      min-width: 48px;
       border-radius: 8px;
       border: none;
       cursor: pointer;
@@ -46,6 +51,28 @@
       font-weight: 500;
     }
     #addPlayerBtn:hover { opacity: 0.9; }
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .preset-name-btn {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 2px solid #ddd;
+      background: #f8f9fa;
+      font-size: 1rem;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+    }
+    .preset-name-btn:hover { background: #e3f2fd; border-color: #90caf9; }
+    .preset-name-btn.already-added {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: #f0f0f0;
+    }
     #playerError {
       color:#f44336;
       margin:8px 0 0 0;
@@ -53,7 +80,6 @@
       width:100%;
     }
 
-    /* Sort buttons */
     #sortControls {
       display: flex;
       flex-wrap: wrap;
@@ -72,20 +98,18 @@
     }
     #sortControls .btn:hover { opacity: 0.9; }
 
-    /* PLAYER CARDS (ipv tabel) */
-    #scoreCards {
-      margin-top: 5px;
-    }
+    #scoreCards { margin-top: 5px; }
+
+    /* ── Player card ── */
     .player-card {
       background: #fff;
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.08);
       padding: 12px 14px;
-      margin-bottom: 10px;
+      margin-bottom: 4px;   /* tighter: diff connector sits between */
       display: flex;
       flex-direction: column;
     }
-    /* bovenrij: naam links, rechts kolom met punten + input */
     .player-row {
       display: flex;
       justify-content: space-between;
@@ -98,10 +122,11 @@
       padding: 4px 6px;
       border-radius: 6px;
       user-select: none;
+      color: #007bff;
+      text-decoration: underline;
+      text-underline-offset: 2px;
     }
-    .player-name:hover {
-      background: #ffeaa7;
-    }
+    .player-name:hover { color: #0056b3; background: #e8f0fe; }
 
     .player-right {
       display: flex;
@@ -109,22 +134,15 @@
       align-items: flex-end;
       gap: 4px;
     }
-
     .player-points {
       cursor: pointer;
       color: #007bff;
       font-weight: 600;
       user-select: none;
     }
-    .player-points:hover {
-      text-decoration: underline;
-    }
+    .player-points:hover { text-decoration: underline; }
 
-    .player-input-row {
-      display: flex;
-      justify-content: flex-end;
-      width: 100%;
-    }
+    .player-input-row { display: flex; justify-content: flex-end; width: 100%; }
     .player-input-row input[type="number"] {
       width: 70px;
       padding: 6px 8px;
@@ -134,7 +152,49 @@
       text-align: center;
     }
 
-    /* Buttons algemeen */
+    /* ── Diff connector ── */
+    .diff-connector {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 18px;
+      height: 22px;
+      margin-bottom: 4px;
+    }
+    .diff-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 2px 9px;
+      border-radius: 20px;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+    /* positive diff = this player has MORE points (worse) */
+    .diff-badge.worse {
+      background: #ffeaea;
+      color: #c0392b;
+      border: 1px solid #f5c6c6;
+    }
+    /* negative diff = this player has FEWER points (better) */
+    .diff-badge.better {
+      background: #e9f7ef;
+      color: #1a7a3e;
+      border: 1px solid #b2dfcc;
+    }
+    /* zero */
+    .diff-badge.equal {
+      background: #f0f0f0;
+      color: #666;
+      border: 1px solid #ddd;
+    }
+    .diff-arrow {
+      font-size: 0.7rem;
+    }
+
+    /* Buttons */
     button.btn {
       cursor: pointer;
       padding: 14px 20px;
@@ -149,16 +209,11 @@
       transition: all 0.2s ease;
       user-select: none;
     }
-    button.btn:hover,
-    button.btn:active {
-      opacity: 0.9;
-      transform: translateY(-1px);
-    }
+    button.btn:hover, button.btn:active { opacity: 0.9; transform: translateY(-1px); }
     .btn-green { background-color: #4CAF50; }
     .btn-red   { background-color: #f44336; }
     .btn-gold  { background-color: #FFD700; color: #333; }
 
-    /* Actiebalk onderaan */
     #actionBar {
       display: flex;
       flex-wrap: wrap;
@@ -178,37 +233,34 @@
       font-weight: 600;
     }
 
-    #floatButton {
-      position: fixed; right: 20px; bottom: 20px;
-      background: linear-gradient(45deg, #007bff, #0056b3);
-      color: white; border: none; border-radius: 50%;
-      width: 70px; height: 70px; font-size: 1.8em;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-      z-index: 9999; display: flex; align-items: center;
-      justify-content: center;
-      user-select: none;
-      cursor: pointer;
-    }
 
-    /* Keyboard open -> verberg vaste elementen */
-    body.keyboard-open #actionBar,
-    body.keyboard-open #floatButton {
-      display: none;
-    }
 
-    /* Modals */
     .modal-background {
       display: none; position: fixed; top: 0; left: 0;
-      width: 100vw; height: 100vh; background: rgba(0,0,0,0.7);
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
       justify-content: center; align-items: center; z-index: 1000;
       padding: 20px;
+      box-sizing: border-box;
     }
     .modal-content {
       background: white; border-radius: 16px;
       max-width: 95vw; max-height: 90vh; overflow-y: auto;
       box-shadow: 0 20px 40px rgba(0,0,0,0.3);
     }
-    #modal { padding: 25px; font-size: 1.1rem; }
+    #modal { padding: 25px; font-size: 1.1rem; width: 95vw; max-width: 95vw; }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px;
+    }
+    .modal-header h3 { margin: 0; }
+    .modal-close-x {
+      background: none; border: none; cursor: pointer;
+      font-size: 1.4rem; line-height: 1; color: #888;
+      padding: 4px 6px; border-radius: 6px;
+      flex-shrink: 0;
+    }
+    .modal-close-x:hover { background: #f0f0f0; color: #333; }
     .celebration-content {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white; padding: 40px 30px; border-radius: 20px;
@@ -220,9 +272,23 @@
     .celebration-subtitle { font-size: 2em; margin-bottom: 20px; }
 
     .history-item {
-      margin-bottom: 15px; display: flex;
+      margin-bottom: 10px; display: flex;
       justify-content: space-between; align-items: center;
-      padding: 12px; background: #f8f9fa; border-radius: 8px;
+      gap: 8px; padding: 10px 12px; background: #f8f9fa; border-radius: 8px;
+    }
+    .history-item-label { flex: 1; font-size: 1rem; }
+    .history-item-edit {
+      display: flex; align-items: center; gap: 6px; flex: 1;
+    }
+    .history-item-edit input[type="number"] {
+      width: 70px; padding: 5px 8px; font-size: 0.95rem;
+      border-radius: 8px; border: 2px solid #4CAF50; text-align: center;
+    }
+    .edit-history-btn {
+      color: #1a7a3e; background: none; border: none;
+      font-size: 18px; width: 32px; height: 32px;
+      cursor: pointer; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center;
     }
     .remove-history-btn {
       color: #b33; background: none; border: none;
@@ -244,47 +310,76 @@
     @media (max-width: 768px) {
       body { font-size: 15px; }
       .player-card { padding: 10px 12px; }
-      .player-input-row input[type="number"] {
-        width: 60px;
-      }
+      .player-input-row input[type="number"] { width: 60px; }
     }
   </style>
 </head>
 <body>
-  <h2>🎮 Wie is de Ezel</h2>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2 style="margin: 0;">Wie is de Ezel</h2>
+    <button id="presetBtn" onclick="openPresetModal()">👥＋</button>
+  </div>
 
-  <!-- Spelers toevoegen -->
   <div id="players">
-    <input
-      type="text"
-      id="playerNameInput"
-      placeholder="Naam nieuwe speler... (Enter)"
-      autocomplete="off"
-    />
-    <button id="addPlayerBtn" onclick="addPlayer()">➕</button>
     <p id="playerError"></p>
   </div>
 
-  <!-- Sorteren -->
-  <div id="sortControls">
-    <button class="btn" onclick="sortPlayers('score')" type="button">📊 Score</button>
-    <button class="btn" onclick="sortPlayers('name')" type="button">🔤 Naam</button>
-    <button class="btn" onclick="sortPlayers('original')" type="button">📋 Volgorde</button>
+  <!-- Spelers toevoegen modal -->
+  <div id="presetModal" class="modal-background" onclick="closePresetModal(event)">
+    <div class="modal-content" style="padding: 25px; width: 90vw; max-width: 460px;" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>👥 Speler toevoegen</h3>
+        <button class="modal-close-x" onclick="closePresetModal()">✕</button>
+      </div>
+      <p style="margin: 0 0 14px 0; font-size: 0.9rem; color: #666;">Kies uit de lijst of typ een eigen naam.</p>
+
+      <!-- Custom name input -->
+      <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+        <input
+          type="text"
+          id="playerNameInput"
+          placeholder="Andere naam... (Enter)"
+          autocomplete="off"
+          style="flex: 1; font-size: 1rem; padding: 12px 14px; border-radius: 10px; border: 2px solid #ddd;"
+        />
+        <button id="addPlayerBtn" onclick="addPlayer()">➕</button>
+      </div>
+      <p id="playerError" style="color:#f44336; margin: -14px 0 14px 0; font-weight:500; font-size:0.9rem;"></p>
+
+      <!-- Preset grid -->
+      <div class="preset-grid" id="presetGrid"></div>
+    </div>
   </div>
 
-  <h3>📈 Scoreoverzicht <small>(tik speler naam om te verwijderen)</small></h3>
+  <div id="sortControls">
+    <button class="btn" onclick="sortPlayers('original')" type="button">📋 Volgorde</button>
+    <button class="btn" onclick="sortPlayers('name')" type="button">🔤 Naam</button>
+    <button class="btn" onclick="sortPlayers('score')" type="button" data-sort="score">📊 Score</button>
+  </div>
+
+  <h3 id="scoreHeader">📈 Scoreoverzicht</h3>
   <div id="scoreCards"></div>
 
-  <!-- Actieknoppen onderaan -->
   <div id="actionBar">
     <button class="btn btn-gold" onclick="showWinnerModal()" type="button">🏆 Winnaar</button>
     <button class="btn btn-red" onclick="showEzelModal()" type="button">🐴 Ezel</button>
     <button class="btn btn-red" onclick="clearAll()" type="button">🗑️ Clear All</button>
   </div>
 
-  <button id="floatButton" onclick="toggleFullscreen()" title="Volledig scherm">⛶</button>
+  <!-- Clear All bevestiging modal -->
+  <div id="clearAllModal" class="modal-background" onclick="cancelClearAll(event)">
+    <div class="modal-content" style="padding: 25px; width: 90vw; max-width: 380px;" onclick="event.stopPropagation()">
+      <h3 style="margin: 0 0 12px 0;">🗑️ Clear All</h3>
+      <p style="margin: 0 0 20px 0; color: #555;">Weet je zeker dat je <strong>alle spelers en scores</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.</p>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-red" style="flex: 1;" onclick="clearAllConfirmed()">✔ Ja, verwijder alles</button>
+        <button class="btn" style="flex: 1; background: #888;" onclick="cancelClearAll()">✕ Annuleren</button>
+      </div>
+    </div>
+  </div>
 
-  <!-- Historie modal -->
+
+
   <div id="modalBackground" class="modal-background" onclick="closeHistoryModal(event)">
     <div id="modal" class="modal-content" onclick="event.stopPropagation()">
       <h3>📋 Historie <span id="modalPlayerName"></span></h3>
@@ -293,7 +388,37 @@
     </div>
   </div>
 
-  <!-- Winnaar modal -->
+  <!-- Speler bewerken modal -->
+  <div id="editPlayerModal" class="modal-background" onclick="closeEditPlayerModal(event)">
+    <div class="modal-content" style="padding: 25px; min-width: 280px; max-width: 400px; width: 90vw;" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>✏️ Speler bewerken</h3>
+        <button class="modal-close-x" onclick="closeEditPlayerModal()">✕</button>
+      </div>
+      <label style="font-size: 0.95rem; color: #555; display: block; margin-bottom: 6px;">Naam</label>
+      <input
+        type="text"
+        id="editPlayerNameInput"
+        style="width: 100%; font-size: 1.1rem; padding: 12px 14px; border-radius: 10px; border: 2px solid #ddd; margin-bottom: 20px;"
+        autocomplete="off"
+      />
+      <p id="editPlayerError" style="color:#f44336; margin: -12px 0 14px 0; font-weight: 500; font-size: 0.9rem;"></p>
+      <div id="editMainButtons" style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-green" style="flex: 1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:10px;" onclick="savePlayerName()"><span>💾</span><span style="font-size:0.85rem;">Opslaan</span></button>
+          <button class="btn btn-red" style="flex: 1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:10px;" onclick="askDeleteConfirm()"><span>🗑️</span><span style="font-size:0.85rem;">Verwijderen</span></button>
+        </div>
+      </div>
+      <div id="editConfirmRow" style="display: none; flex-direction: column; gap: 10px;">
+        <p style="margin: 0 0 6px 0; font-weight: 500; color: #c0392b;">Zeker weten? Dit kan niet ongedaan worden gemaakt.</p>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-red" style="flex: 1;" onclick="deletePlayerConfirmed()">✔ Ja, verwijder</button>
+          <button class="btn" style="flex: 1; background: #888;" onclick="cancelDelete()">✕ Annuleren</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="winnerModal" class="modal-background" onclick="closeCelebrationModal(event)">
     <div class="celebration-content modal-content" onclick="event.stopPropagation()">
       <div class="winner-trophy">🏆</div>
@@ -304,7 +429,6 @@
     </div>
   </div>
 
-  <!-- Ezel modal -->
   <div id="ezelModal" class="modal-background" onclick="closeCelebrationModal(event)">
     <div class="celebration-content modal-content" onclick="event.stopPropagation()">
       <div class="ezel-emoji">🐴</div>
@@ -319,6 +443,43 @@
     let players = [];
     let insertionCount = 0;
     let modalOpenForIndex = null;
+    let scoreSortAsc = true;
+    let editPlayerIndex = null;
+
+    const PRESET_NAMES = [
+      'Evelien', 'Hilde', 'Maarten', 'Manon', 'Sander', 'Sacha', 'Yärnn'
+    ];
+
+    function refreshPresetGrid() {
+      const grid = document.getElementById('presetGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      PRESET_NAMES.forEach(name => {
+        const alreadyAdded = players.some(p => p.name.toLowerCase() === name.toLowerCase());
+        const btn = document.createElement('button');
+        btn.className = 'preset-name-btn' + (alreadyAdded ? ' already-added' : '');
+        btn.textContent = name;
+        btn.disabled = alreadyAdded;
+        btn.onclick = () => {
+          players.push({ name, points: 0, history: [], insertionIndex: insertionCount++ });
+          savePlayers();
+          renderCards();
+          btn.classList.add('already-added');
+          btn.disabled = true;
+        };
+        grid.appendChild(btn);
+      });
+    }
+
+    function openPresetModal() {
+      refreshPresetGrid();
+      document.getElementById('presetModal').style.display = 'flex';
+    }
+
+    function closePresetModal(e) {
+      if (e && e.target.id !== 'presetModal') return;
+      document.getElementById('presetModal').style.display = 'none';
+    }
 
     function createConfetti() {
       for (let i = 0; i < 80; i++) {
@@ -346,16 +507,14 @@
       localStorage.setItem('ezelplayers', JSON.stringify(players));
     }
 
-    function addPlayer() {
-      addPlayerLogic();
-    }
+    function addPlayer() { addPlayerLogic(); }
 
     document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('playerNameInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          addPlayerLogic();
-        }
+        if (e.key === 'Enter') { e.preventDefault(); addPlayerLogic(); }
+      });
+      document.getElementById('editPlayerNameInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); savePlayerName(); }
       });
     });
 
@@ -363,21 +522,16 @@
       const input = document.getElementById('playerNameInput');
       const errorMsg = document.getElementById('playerError');
       const name = input.value.trim();
-
-      if (!name) {
-        errorMsg.textContent = 'Naam mag niet leeg zijn.';
-        return;
-      }
+      if (!name) { errorMsg.textContent = 'Naam mag niet leeg zijn.'; return; }
       if (players.some(p => p.name.toLowerCase() === name.toLowerCase())) {
-        errorMsg.textContent = 'Naam moet uniek zijn.';
-        return;
+        errorMsg.textContent = 'Naam moet uniek zijn.'; return;
       }
-
       errorMsg.textContent = '';
       players.push({ name, points: 0, history: [], insertionIndex: insertionCount++ });
       input.value = '';
       savePlayers();
       renderCards();
+      refreshPresetGrid();
     }
 
     function removePlayer(index) {
@@ -389,25 +543,102 @@
       }
     }
 
-    function clearAll() {
-      if (confirm('Weet je zeker dat je ALLE spelers en hun scores wilt verwijderen? Dit kan niet ongedaan gemaakt worden.')) {
-        players = [];
-        insertionCount = 0;
-        localStorage.removeItem('ezelplayers');
-        renderCards();
+    function openEditPlayerModal(index) {
+      editPlayerIndex = index;
+      document.getElementById('editPlayerNameInput').value = players[index].name;
+      document.getElementById('editPlayerError').textContent = '';
+      document.getElementById('editConfirmRow').style.display = 'none';
+      document.getElementById('editMainButtons').style.display = 'flex';
+      document.getElementById('editPlayerModal').style.display = 'flex';
+      setTimeout(() => document.getElementById('editPlayerNameInput').focus(), 100);
+    }
+
+    function closeEditPlayerModal(e) {
+      if (e && e.target && e.target.id !== 'editPlayerModal') return;
+      document.getElementById('editPlayerModal').style.display = 'none';
+      editPlayerIndex = null;
+    }
+
+    function savePlayerName() {
+      const input = document.getElementById('editPlayerNameInput');
+      const errorMsg = document.getElementById('editPlayerError');
+      const newName = input.value.trim();
+      if (!newName) { errorMsg.textContent = 'Naam mag niet leeg zijn.'; return; }
+      if (players.some((p, i) => p.name.toLowerCase() === newName.toLowerCase() && i !== editPlayerIndex)) {
+        errorMsg.textContent = 'Naam moet uniek zijn.'; return;
       }
+      players[editPlayerIndex].name = newName;
+      savePlayers();
+      renderCards();
+      document.getElementById('editPlayerModal').style.display = 'none';
+      editPlayerIndex = null;
+    }
+
+    function askDeleteConfirm() {
+      document.getElementById('editMainButtons').style.display = 'none';
+      document.getElementById('editConfirmRow').style.display = 'flex';
+    }
+
+    function deletePlayerConfirmed() {
+      players.splice(editPlayerIndex, 1);
+      savePlayers();
+      renderCards();
+      document.getElementById('editPlayerModal').style.display = 'none';
+      editPlayerIndex = null;
+    }
+
+    function cancelDelete() {
+      document.getElementById('editConfirmRow').style.display = 'none';
+      document.getElementById('editMainButtons').style.display = 'flex';
+    }
+
+    function clearAll() {
+      document.getElementById('clearAllModal').style.display = 'flex';
+    }
+
+    function clearAllConfirmed() {
+      players = [];
+      insertionCount = 0;
+      localStorage.removeItem('ezelplayers');
+      renderCards();
+      document.getElementById('clearAllModal').style.display = 'none';
+    }
+
+    function cancelClearAll(e) {
+      if (e && e.target.id !== 'clearAllModal') return;
+      document.getElementById('clearAllModal').style.display = 'none';
     }
 
     function addAllPointsOnEnter(event) {
       if (event.key !== 'Enter') return;
       event.preventDefault();
-      players.forEach((p,i) => {
+
+      // Check all inputs are filled with a valid non-negative number
+      const missing = players.some((p, i) => {
         const inp = document.getElementById('pointsInput-' + i);
-        if (!inp) return;
+        if (!inp) return false;
         const val = inp.value.trim();
-        if (!val) return;
-        const add = parseInt(val, 10);
-        if (isNaN(add) || add < 0) return;
+        const num = parseInt(val, 10);
+        return !val || isNaN(num) || num < 0;
+      });
+
+      if (missing) {
+        // Highlight empty inputs
+        players.forEach((p, i) => {
+          const inp = document.getElementById('pointsInput-' + i);
+          if (!inp) return;
+          const val = inp.value.trim();
+          if (!val || isNaN(parseInt(val, 10)) || parseInt(val, 10) < 0) {
+            inp.style.borderColor = '#f44336';
+            setTimeout(() => { inp.style.borderColor = ''; }, 1500);
+          }
+        });
+        return;
+      }
+
+      players.forEach((p, i) => {
+        const inp = document.getElementById('pointsInput-' + i);
+        const add = parseInt(inp.value.trim(), 10);
         p.points += add;
         p.history.push(add);
         inp.value = '';
@@ -420,26 +651,91 @@
       modalOpenForIndex = index;
       const modal = document.getElementById('modal');
       modal.innerHTML = `
-        <h3>📋 Historie <span id="modalPlayerName"></span></h3>
+        <div class="modal-header">
+          <h3>📋 Historie <span id="modalPlayerName"></span></h3>
+          <button class="modal-close-x" onclick="closeHistoryModal()">✕</button>
+        </div>
         <div id="modalHistoryContainer"></div>
-        <button class="btn btn-green" onclick="closeHistoryModal()">✕ Sluiten</button>`;
-      const modalName = document.getElementById('modalPlayerName');
-      const container = document.getElementById('modalHistoryContainer');
-      modalName.textContent = players[index].name;
-      container.innerHTML = '';
-      if (players[index].history.length === 0) {
-        container.innerHTML = '<em>Geen score historie</em>';
-      } else {
-        players[index].history.forEach((pt,hIdx) => {
-          const div = document.createElement('div');
-          div.className = 'history-item';
-          div.innerHTML = `
-            <span>${pt} punten</span>
-            <button class="remove-history-btn" title="Verwijder deze punt" onclick="removeHistoryPoint(${index},${hIdx})">✖</button>`;
-          container.appendChild(div);
-        });
-      }
+        <div style="display:flex; gap:8px; margin-top:16px; overflow:hidden;">
+          <input type="number" id="modalAddInput" min="0" placeholder="Score toevoegen..." style="flex:1; min-width:0; width:0; font-size:1rem; padding:10px 12px; border-radius:10px; border:2px solid #ddd; box-sizing:border-box;" />
+          <button class="btn btn-green" style="padding:10px 14px; flex-shrink:0;" onclick="addHistoryFromModal()">➕</button>
+        </div>
+        <p id="modalAddError" style="color:#f44336; margin:6px 0 0 0; font-size:0.9rem; font-weight:500;"></p>`;
+      document.getElementById('modalPlayerName').textContent = players[index].name;
+      document.getElementById('modalAddInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); addHistoryFromModal(); }
+      });
+      renderHistoryItems(index);
       document.getElementById('modalBackground').style.display = 'flex';
+    }
+
+    function addHistoryFromModal() {
+      const inp = document.getElementById('modalAddInput');
+      const err = document.getElementById('modalAddError');
+      const val = parseInt(inp.value, 10);
+      if (isNaN(val) || val < 0) { err.textContent = 'Vul een geldig getal in.'; return; }
+      err.textContent = '';
+      players[modalOpenForIndex].history.push(val);
+      players[modalOpenForIndex].points += val;
+      inp.value = '';
+      savePlayers();
+      renderCards();
+      renderHistoryItems(modalOpenForIndex);
+    }
+
+    function renderHistoryItems(pIdx) {
+      const container = document.getElementById('modalHistoryContainer');
+      container.innerHTML = '';
+      if (players[pIdx].history.length === 0) {
+        container.innerHTML = '<em>Geen score historie</em>';
+        return;
+      }
+      players[pIdx].history.forEach((pt, hIdx) => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.id = `histItem-${hIdx}`;
+        div.innerHTML = `
+          <span class="history-item-label" id="histLabel-${hIdx}">${pt} punten</span>
+          <div id="histActions-${hIdx}" style="display:flex; align-items:center; gap:4px;">
+            <button class="edit-history-btn" title="Aanpassen" onclick="startEditHistory(${pIdx},${hIdx})">✏️</button>
+            <button class="remove-history-btn" title="Verwijder" onclick="askRemoveHistory(${pIdx},${hIdx})">✖</button>
+          </div>
+          <div id="histConfirm-${hIdx}" style="display:none; align-items:center; gap:6px;">
+            <span style="font-size:0.85rem; color:#c0392b; font-weight:500;">Verwijderen?</span>
+            <button class="edit-history-btn" title="Ja" onclick="removeHistoryPoint(${pIdx},${hIdx})" style="color:#1a7a3e;">✔</button>
+            <button class="remove-history-btn" title="Nee" onclick="cancelRemoveHistory(${hIdx})">✖</button>
+          </div>`;
+        container.appendChild(div);
+      });
+    }
+
+    function startEditHistory(pIdx, hIdx) {
+      const label = document.getElementById(`histLabel-${hIdx}`);
+      const currentVal = players[pIdx].history[hIdx];
+      label.outerHTML = `
+        <div class="history-item-edit" id="histLabel-${hIdx}">
+          <input type="number" id="histEditInput-${hIdx}" min="0" value="${currentVal}" />
+          <button class="edit-history-btn" title="Opslaan" onclick="saveEditHistory(${pIdx},${hIdx})">💾</button>
+        </div>`;
+      const inp = document.getElementById(`histEditInput-${hIdx}`);
+      inp.focus();
+      inp.select();
+      inp.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); saveEditHistory(pIdx, hIdx); }
+        if (e.key === 'Escape') renderHistoryItems(pIdx);
+      });
+    }
+
+    function saveEditHistory(pIdx, hIdx) {
+      const inp = document.getElementById(`histEditInput-${hIdx}`);
+      const newVal = parseInt(inp.value, 10);
+      if (isNaN(newVal) || newVal < 0) { inp.style.borderColor = '#f44336'; return; }
+      const oldVal = players[pIdx].history[hIdx];
+      players[pIdx].history[hIdx] = newVal;
+      players[pIdx].points = players[pIdx].history.reduce((sum, v) => sum + v, 0);
+      savePlayers();
+      renderCards();
+      renderHistoryItems(pIdx);
     }
 
     function closeHistoryModal(e) {
@@ -457,34 +753,72 @@
       document.querySelectorAll('.confetti').forEach(c => c.remove());
     }
 
+    function askRemoveHistory(pIdx, hIdx) {
+      document.getElementById(`histActions-${hIdx}`).style.display = 'none';
+      document.getElementById(`histConfirm-${hIdx}`).style.display = 'flex';
+    }
+
+    function cancelRemoveHistory(hIdx) {
+      document.getElementById(`histConfirm-${hIdx}`).style.display = 'none';
+      document.getElementById(`histActions-${hIdx}`).style.display = 'flex';
+    }
+
     function removeHistoryPoint(pIdx, hIdx) {
-      if (confirm('Weet je zeker dat je deze puntentoevoeging wilt verwijderen?')) {
-        const pts = players[pIdx].history.splice(hIdx,1)[0];
-        players[pIdx].points -= pts;
-        if (players[pIdx].points < 0) players[pIdx].points = 0;
-        savePlayers();
-        renderCards();
-        if (modalOpenForIndex === pIdx) openHistoryModal(pIdx);
+      players[pIdx].history.splice(hIdx, 1);
+      players[pIdx].points = players[pIdx].history.reduce((sum, v) => sum + v, 0);
+      savePlayers();
+      renderCards();
+      renderHistoryItems(pIdx);
+    }
+
+    /* ── Build diff badge HTML ── */
+    function diffBadgeHTML(diff) {
+      if (diff === 0) {
+        return `<span class="diff-badge equal">= gelijk</span>`;
+      } else if (diff > 0) {
+        /* this player has MORE points = worse in Ezel (lower is better) */
+        return `<span class="diff-badge worse">▲ +${diff}</span>`;
+      } else {
+        return `<span class="diff-badge better">▼ ${diff}</span>`;
       }
     }
 
     function renderCards() {
       const container = document.getElementById('scoreCards');
       container.innerHTML = '';
+
+      // Update header with round count
+      const rounds = players.length ? Math.max(...players.map(p => p.history.length)) : 0;
+      const header = document.getElementById('scoreHeader');
+      if (header) {
+        if (rounds === 0) header.innerHTML = '📈 Scoreoverzicht';
+        else if (rounds === 1) header.innerHTML = '📈 Scoreoverzicht <small>(1 ronde)</small>';
+        else header.innerHTML = `📈 Scoreoverzicht <small>(${rounds} rondes)</small>`;
+      }
+
       if (!players.length) {
         container.innerHTML = '<em>Geen spelers toegevoegd</em>';
         return;
       }
       players.forEach((p, i) => {
-        const entries = p.history.length;
+
+        /* ── Diff connector between cards ── */
+        if (i > 0) {
+          const diff = p.points - players[i - 1].points;
+          const connectorDiv = document.createElement('div');
+          connectorDiv.className = 'diff-connector';
+          connectorDiv.innerHTML = diffBadgeHTML(diff);
+          container.appendChild(connectorDiv);
+        }
+
         const card = document.createElement('div');
         card.className = 'player-card';
         card.innerHTML = `
           <div class="player-row">
-            <span class="player-name" onclick="removePlayer(${i})" title="Tik om te verwijderen">${p.name}</span>
+            <span class="player-name" onclick="openEditPlayerModal(${i})" title="Tik om te bewerken">${p.name}</span>
             <div class="player-right">
               <span class="player-points" onclick="openHistoryModal(${i})" title="Klik voor historie">
-                ${p.points} (${entries})
+                ${p.points} (${p.history.length})
               </span>
               <div class="player-input-row">
                 <input type="number" id="pointsInput-${i}" min="0" placeholder="0" />
@@ -493,72 +827,69 @@
           </div>
         `;
         container.appendChild(card);
+
         const inputEl = document.getElementById(`pointsInput-${i}`);
         inputEl.addEventListener('keydown', addAllPointsOnEnter);
         inputEl.addEventListener('focus', () => {
-          setTimeout(() => {
-            inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }, 250);
+          setTimeout(() => inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' }), 250);
         });
       });
     }
 
     function showWinnerModal() {
-      if (players.length === 0) {
-        alert('Geen spelers.');
-        return;
+      if (players.length === 0) { alert('Geen spelers.'); return; }
+      const minPunten = Math.min(...players.map(p => p.points));
+      const winnaars = players.filter(p => p.points === minPunten);
+      const nameEl = document.getElementById('winnerName');
+      if (winnaars.length === 1) {
+        nameEl.textContent = winnaars[0].name;
+      } else {
+        nameEl.innerHTML = winnaars.map(w => `<div>${w.name}</div>`).join('');
       }
-      let minPunten = Math.min(...players.map(p => p.points));
-      let winnaar = players.find(p => p.points === minPunten);
-      document.getElementById('winnerName').textContent = winnaar.name;
-      document.getElementById('winnerScore').textContent = `${winnaar.points} punten`;
+      document.getElementById('winnerScore').textContent = `${minPunten} punten`;
       document.getElementById('winnerModal').style.display = 'flex';
       createConfetti();
     }
 
     function showEzelModal() {
-      if (players.length === 0) {
-        alert('Geen spelers.');
-        return;
+      if (players.length === 0) { alert('Geen spelers.'); return; }
+      const maxPunten = Math.max(...players.map(p => p.points));
+      const ezels = players.filter(p => p.points === maxPunten);
+      const nameEl = document.getElementById('ezelName');
+      if (ezels.length === 1) {
+        nameEl.textContent = ezels[0].name;
+      } else {
+        nameEl.innerHTML = ezels.map(e => `<div>${e.name}</div>`).join('');
       }
-      let maxPunten = Math.max(...players.map(p => p.points));
-      let ezel = players.find(p => p.points === maxPunten);
-      document.getElementById('ezelName').textContent = ezel.name;
-      document.getElementById('ezelScore').textContent = `${ezel.points} punten`;
+      document.getElementById('ezelScore').textContent = `${maxPunten} punten`;
       document.getElementById('ezelModal').style.display = 'flex';
     }
 
     function sortPlayers(criteria) {
+      const scoreBtn = document.querySelector('#sortControls .btn[data-sort="score"]');
       if (criteria === 'score') {
-        players.sort((a, b) => b.points - a.points);
+        players.sort((a, b) => scoreSortAsc ? a.points - b.points : b.points - a.points);
+        if (scoreBtn) scoreBtn.textContent = scoreSortAsc ? '📊 Score ↑' : '📊 Score ↓';
+        scoreSortAsc = !scoreSortAsc;
       } else if (criteria === 'name') {
         players.sort((a, b) => a.name.localeCompare(b.name));
+        scoreSortAsc = true;
+        if (scoreBtn) scoreBtn.textContent = '📊 Score';
       } else if (criteria === 'original') {
         players.sort((a, b) => (a.insertionIndex ?? 0) - (b.insertionIndex ?? 0));
+        scoreSortAsc = true;
+        if (scoreBtn) scoreBtn.textContent = '📊 Score';
       }
       renderCards();
     }
 
-    async function toggleFullscreen() {
-      if (!document.fullscreenElement) {
-        try { await document.documentElement.requestFullscreen(); }
-        catch(e) { console.log(e); }
-      } else {
-        try { await document.exitFullscreen(); }
-        catch(e) { console.log(e); }
-      }
-    }
-
-    /* keyboard open/close detectie voor mobile */
     window.addEventListener('focusin', (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')
         document.body.classList.add('keyboard-open');
-      }
     });
     window.addEventListener('focusout', (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')
         document.body.classList.remove('keyboard-open');
-      }
     });
   </script>
 </body>
