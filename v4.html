@@ -218,6 +218,11 @@
     }
     .summary-tile .v { font-size: 1.35rem; font-weight: 700; color: #2f80ed; }
     .summary-tile .l { font-size: 0.78rem; color: #666; }
+    .summary-tile small { font-size: 0.7rem; color: #888; }
+
+    #statsTable { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    #statsTable th, #statsTable td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #eee; white-space: nowrap; }
+    #statsTable th { color: #666; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; }
 
     .game-item {
       display: flex;
@@ -353,7 +358,7 @@
       <div class="preset-grid" id="presetGrid"></div>
 
       <hr style="border:none; border-top:1px solid #eee; margin: 6px 0 16px 0;" />
-      <button class="btn btn-red" style="width:100%;" onclick="clearAll()">🗑️ Nieuw spel</button>
+      <button class="btn btn-red" style="width:100%;" onclick="clearAll()">🗑️ Clear All</button>
     </div>
   </div>
 
@@ -408,11 +413,19 @@
           <option value="name">Naam A-Z</option>
           <option value="rounds">Meeste rondes</option>
         </select>
-        <button class="btn btn-blue" style="min-width:60px;" onclick="loadGamesList()">🔄</button>
+        <button class="btn btn-blue" style="min-width:60px;" onclick="refreshCloudModal()">🔄</button>
       </div>
 
-      <p style="font-size:0.82rem; color:#666; margin:0 0 12px 0;">📥 laden · ✏️ hernoemen · ⬆️ overschrijven met huidige stand · 🗑️ verwijderen (✏️ ⬆️ 🗑️ vragen het wachtwoord)</p>
+      <p style="font-size:0.82rem; color:#666; margin:0 0 12px 0;">📥 laden · ✏️ hernoemen · ⬆️ overschrijven met huidige stand · 🗑️ verwijderen — allemaal vragen het wachtwoord</p>
       <div id="gamesList"><em>Laden...</em></div>
+
+      <details id="statsDetails" style="margin-top:18px;">
+        <summary style="cursor:pointer; font-weight:600; font-size:1.05rem;">📊 Extra statistieken</summary>
+        <div id="statsTiles" style="display:flex; flex-wrap:wrap; gap:10px; margin:14px 0;"></div>
+        <div style="overflow-x:auto;">
+          <table id="statsTable"></table>
+        </div>
+      </details>
 
       <div style="margin-top:16px; display:flex; justify-content:flex-end;">
         <button class="btn btn-grey" onclick="forgetPassword()">🔒 Wachtwoord vergeten</button>
@@ -634,13 +647,11 @@
     async function overwriteCurrentGame() {
       if (!currentGameId) return;
       const name = document.getElementById('saveNameInput').value.trim();
-      const pw = await askPassword('Overschrijven vereist het wachtwoord.');
-      if (pw === null) return;
       const st = document.getElementById('saveStatus');
       st.textContent = 'Overschrijven...';
       try {
-        await api({ action: 'update', id: currentGameId, name: name, players: players, password: pw });
-        rememberPw(pw);
+        // Het huidige, actieve spel overschrijven vereist geen wachtwoord.
+        await api({ action: 'update', id: currentGameId, name: name, players: players, skipAuth: true });
         setCurrentGame(currentGameId, name || currentGameName);
         st.textContent = '';
         document.getElementById('saveModal').style.display = 'none';
@@ -651,11 +662,16 @@
     /* ═══════════ Spellen overzicht ═══════════ */
     function openCloudModal() {
       document.getElementById('cloudModal').style.display = 'flex';
-      loadGamesList();
+      refreshCloudModal();
     }
     function closeCloudModal(e) {
       if (e && e.target.id !== 'cloudModal') return;
       document.getElementById('cloudModal').style.display = 'none';
+    }
+
+    function refreshCloudModal() {
+      loadGamesList();
+      loadStats();
     }
 
     async function loadGamesList() {
@@ -744,10 +760,84 @@
       });
     }
 
+    function statTile(label, valueHtml) {
+      return `<div class="summary-tile"><div class="v">${valueHtml}</div><div class="l">${label}</div></div>`;
+    }
+
+    async function loadStats() {
+      const tilesEl = document.getElementById('statsTiles');
+      const tableEl = document.getElementById('statsTable');
+      tilesEl.innerHTML = '<em>Laden...</em>';
+      tableEl.innerHTML = '';
+      try {
+        const r = await api({ action: 'stats' });
+        renderStats(r.stats);
+      } catch (err) {
+        tilesEl.innerHTML = '<em style="color:#c0392b;">' + escapeHtml(err.message) + '</em>';
+      }
+    }
+
+    function renderStats(stats) {
+      const tilesEl = document.getElementById('statsTiles');
+      const tableEl = document.getElementById('statsTable');
+      if (!stats) { tilesEl.innerHTML = '<em>Nog geen data.</em>'; tableEl.innerHTML = ''; return; }
+
+      let tiles = '';
+      if (stats.bestMargin) {
+        tiles += statTile(
+          `Grootste marge · ${stats.bestMargin.margin} pt<br><small>${escapeHtml(stats.bestMargin.gameName)} · ${escapeHtml(fmtDate(stats.bestMargin.date))}</small>`,
+          `🏆 ${escapeHtml(stats.bestMargin.winner)}<br>🐴 ${escapeHtml(stats.bestMargin.ezel)}`
+        );
+      }
+      if (stats.bestComeback) {
+        tiles += statTile(
+          `Grootste comeback<br><small>${escapeHtml(stats.bestComeback.gameName)} · ${escapeHtml(fmtDate(stats.bestComeback.date))}</small>`,
+          `${escapeHtml(stats.bestComeback.player)}<br><small>rang ${stats.bestComeback.halfwayRank} → ${stats.bestComeback.finalRank}</small>`
+        );
+      }
+      if (stats.worstDecline) {
+        tiles += statTile(
+          `Grootste inzinking<br><small>${escapeHtml(stats.worstDecline.gameName)} · ${escapeHtml(fmtDate(stats.worstDecline.date))}</small>`,
+          `${escapeHtml(stats.worstDecline.player)}<br><small>rang ${stats.worstDecline.halfwayRank} → ${stats.worstDecline.finalRank}</small>`
+        );
+      }
+      if (stats.rivalry) {
+        const rv = stats.rivalry;
+        tiles += statTile(
+          `Grootste rivaliteit<br><small>${rv.count}x samen gespeeld${rv.ties ? ' · ' + rv.ties + 'x gelijk' : ''}</small>`,
+          `${escapeHtml(rv.a)} ${rv.aWins} - ${rv.bWins} ${escapeHtml(rv.b)}`
+        );
+      }
+      tilesEl.innerHTML = tiles || '<em>Nog niet genoeg data voor deze statistieken.</em>';
+
+      const rows = (stats.players || []).slice().sort((a, b) => (a.avgPerRound ?? 999) - (b.avgPerRound ?? 999));
+      let html = `<tr>
+        <th>Speler</th><th>Spellen</th><th>Gem. pt/ronde</th>
+        <th>Win%</th><th>Ezel%</th><th>Beste winreeks</th><th>Beste ezelreeks</th><th>Trend</th>
+      </tr>`;
+      rows.forEach(p => {
+        const trendIcon = p.trend === 'verbetert' ? '📈' : (p.trend === 'verslechtert' ? '📉' : '➖');
+        html += `<tr>
+          <td>${escapeHtml(p.name)}</td>
+          <td>${p.gamesPlayed}</td>
+          <td>${p.avgPerRound !== null ? p.avgPerRound.toFixed(2) : '-'}</td>
+          <td>${p.winPct.toFixed(0)}% (${p.winCount})</td>
+          <td>${p.ezelPct.toFixed(0)}% (${p.ezelCount})</td>
+          <td>${p.bestWinStreak}</td>
+          <td>${p.bestEzelStreak}</td>
+          <td>${trendIcon} ${p.trend}</td>
+        </tr>`;
+      });
+      tableEl.innerHTML = html;
+    }
+
     async function loadGame(id) {
       if (players.length && !confirm('Huidige stand vervangen door dit opgeslagen spel?')) return;
+      const pw = await askPassword('Een historisch spel laden vereist het wachtwoord.');
+      if (pw === null) return;
       try {
-        const r = await api({ action: 'get', id: id });
+        const r = await api({ action: 'get', id: id, password: pw });
+        rememberPw(pw);
         players = (r.game.players || []).map((p, i) => ({
           name: p.name,
           points: (p.history || []).reduce((s, v) => s + v, 0),
