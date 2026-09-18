@@ -335,8 +335,8 @@
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 8px;">
     <h2 style="margin: 0;">Wie is de Ezel</h2>
     <div style="display: flex; gap: 8px;">
-      <button class="icon-btn blue" onclick="openCloudModal()" title="Spellen historie">🗂️</button>
-      <button id="presetBtn" class="icon-btn" onclick="openPresetModal()" title="Spelers beheren">👥＋</button>
+      <button class="icon-btn" onclick="openCloudModal()" title="Spellen historie">🗂️</button>
+      <button id="presetBtn" class="icon-btn blue" onclick="openPresetModal()" title="Spelers beheren">👥＋</button>
     </div>
   </div>
 
@@ -358,11 +358,10 @@
 
       <div class="preset-grid" id="presetGrid"></div>
 
-      <hr style="border:none; border-top:1px solid #eee; margin: 6px 0 16px 0;" />
-      <div style="display:flex; gap:10px;">
-        <button class="btn btn-blue" style="flex:2;" onclick="closePresetModal()">💾 Opslaan</button>
-        <button class="btn btn-red" style="flex:1;" onclick="clearAll()">🔄 Nieuw spel</button>
-      </div>
+      <button class="btn btn-blue" style="width:100%; margin-top:4px;" onclick="closePresetModal()">💾 Opslaan</button>
+
+      <hr style="border:none; border-top:1px solid #eee; margin: 16px 0;" />
+      <button class="btn btn-red" style="width:100%;" onclick="clearAll()">🔄 Nieuw spel</button>
     </div>
   </div>
 
