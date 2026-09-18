@@ -18,26 +18,24 @@
     h2 { font-size: 1.8rem; margin: 0 0 20px 0; }
     h3 { font-size: 1.3rem; margin: 0 0 15px 0; }
 
-    #players {
-      margin-bottom: 25px;
-    }
-    #presetBtn {
+    .icon-btn {
       padding: 0;
-      font-size: 1.6rem;
-      width: 64px;
+      font-size: 1.4rem;
+      width: 56px;
       height: 44px;
       border-radius: 10px;
       border: none;
       cursor: pointer;
-      background: #4CAF50;
+      background: #0060AB;
       color: #fff;
-      font-weight: 400;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
     }
-    #presetBtn:hover { opacity: 0.9; }
+    .icon-btn:hover { opacity: 0.9; }
+    .icon-btn.blue { background: #F69755; color: #fff; }
+
     #addPlayerBtn {
       padding: 12px 16px;
       font-size: 1rem;
@@ -46,7 +44,7 @@
       border-radius: 8px;
       border: none;
       cursor: pointer;
-      background: #4CAF50;
+      background: #0060AB;
       color: #fff;
       font-weight: 500;
     }
@@ -67,18 +65,13 @@
       text-align: center;
       transition: all 0.15s;
     }
-    .preset-name-btn:hover { background: #e3f2fd; border-color: #90caf9; }
+    .preset-name-btn:hover { background: #e8f1f8; border-color: #0060AB; }
     .preset-name-btn.already-added {
       opacity: 0.4;
       cursor: not-allowed;
       background: #f0f0f0;
     }
-    #playerError {
-      color:#f44336;
-      margin:8px 0 0 0;
-      font-weight:500;
-      width:100%;
-    }
+    .preset-name-btn.custom { border-style: dashed; border-color: #b8c4d0; }
 
     #sortControls {
       display: flex;
@@ -92,7 +85,7 @@
       font-size: 0.95rem;
       border-radius: 8px;
       border: none;
-      background: #4CAF50;
+      background: #0060AB;
       color: #fff;
       font-weight: 500;
     }
@@ -106,7 +99,7 @@
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.08);
       padding: 12px 14px;
-      margin-bottom: 4px;   /* tighter: diff connector sits between */
+      margin-bottom: 4px;
       display: flex;
       flex-direction: column;
     }
@@ -122,11 +115,11 @@
       padding: 4px 6px;
       border-radius: 6px;
       user-select: none;
-      color: #007bff;
+      color: #0060AB;
       text-decoration: underline;
       text-underline-offset: 2px;
     }
-    .player-name:hover { color: #0056b3; background: #e8f0fe; }
+    .player-name:hover { color: #004a85; background: #e8f1f8; }
 
     .player-right {
       display: flex;
@@ -136,7 +129,7 @@
     }
     .player-points {
       cursor: pointer;
-      color: #007bff;
+      color: #0060AB;
       font-weight: 600;
       user-select: none;
     }
@@ -172,27 +165,9 @@
       letter-spacing: 0.02em;
       white-space: nowrap;
     }
-    /* positive diff = this player has MORE points (worse) */
-    .diff-badge.worse {
-      background: #ffeaea;
-      color: #c0392b;
-      border: 1px solid #f5c6c6;
-    }
-    /* negative diff = this player has FEWER points (better) */
-    .diff-badge.better {
-      background: #e9f7ef;
-      color: #1a7a3e;
-      border: 1px solid #b2dfcc;
-    }
-    /* zero */
-    .diff-badge.equal {
-      background: #f0f0f0;
-      color: #666;
-      border: 1px solid #ddd;
-    }
-    .diff-arrow {
-      font-size: 0.7rem;
-    }
+    .diff-badge.worse { background: #fbeceb; color: #D73230; border: 1px solid #eeb6b5; }
+    .diff-badge.better { background: #e6f2e6; color: #008000; border: 1px solid #008000; }
+    .diff-badge.equal { background: #f0f0f0; color: #666; border: 1px solid #ddd; }
 
     /* Buttons */
     button.btn {
@@ -210,30 +185,89 @@
       user-select: none;
     }
     button.btn:hover, button.btn:active { opacity: 0.9; transform: translateY(-1px); }
-    .btn-green { background-color: #4CAF50; }
-    .btn-red   { background-color: #f44336; }
-    .btn-gold  { background-color: #FFD700; color: #333; }
+    button.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-green { background-color: #008000; }
+    .btn-red   { background-color: #D73230; }
+    .btn-blue  { background-color: #0060AB; }
+    .btn-grey  { background-color: #7f8c9b; }
+    .btn-orange{ background-color: #F69755; color: #0060AB; }
 
-    #actionBar {
+    #cloudBar {
       display: flex;
+      gap: 10px;
       flex-wrap: wrap;
-      gap: 12px;
-      margin: 25px 0 10px 0;
-      padding: 16px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 16px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-      justify-content: center;
+      align-items: center;
+      margin: 22px 0 0 0;
+      padding: 14px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
     }
-    #actionBar .btn {
-      flex: 1;
-      min-width: 120px;
+    #cloudBar .btn { flex: 1; min-width: 140px; padding: 12px 14px; font-size: 1rem; }
+    #cloudState { width: 100%; font-size: 0.85rem; color: #666; }
+    #cloudState b { color: #333; }
+
+    /* ── Spellen overzicht ── */
+    #gamesSummary {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      margin-bottom: 16px;
+    }
+    .summary-tile {
+      flex: 1; min-width: 110px;
+      background: #f2f5f9; border-radius: 10px;
+      padding: 10px 12px; text-align: center;
+    }
+    .summary-tile .v { font-size: 1.35rem; font-weight: 700; color: #0060AB; }
+    .summary-tile .l { font-size: 0.78rem; color: #666; }
+    .summary-tile small { font-size: 0.7rem; color: #888; }
+
+    #statsTable { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    #statsTable th, #statsTable td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #eee; white-space: nowrap; }
+    #statsTable th { color: #666; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; }
+
+    .game-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .game-item.active { outline: 2px solid #0060AB; background: #e8f1f8; }
+    .game-meta { flex: 1; min-width: 180px; display: flex; flex-direction: column; gap: 2px; }
+    .game-meta .g-name { font-weight: 600; }
+    .game-meta small { color: #666; font-size: 0.82rem; }
+    .game-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .game-actions button {
+      border: none; background: #fff; cursor: pointer;
+      width: 40px; height: 40px; border-radius: 10px;
+      font-size: 1.05rem; box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    .game-actions button:hover { background: #e9eef5; }
+
+    #toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%) translateY(20px);
+      background: #333;
+      color: #fff;
       padding: 12px 18px;
-      font-size: 1.05rem;
-      font-weight: 600;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+      z-index: 2000;
+      max-width: 90vw;
+      text-align: center;
     }
-
-
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #toast.err { background: #D73230; }
+    #toast.ok  { background: #008000; }
 
     .modal-background {
       display: none; position: fixed; top: 0; left: 0;
@@ -261,15 +295,10 @@
       flex-shrink: 0;
     }
     .modal-close-x:hover { background: #f0f0f0; color: #333; }
-    .celebration-content {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white; padding: 40px 30px; border-radius: 20px;
-      text-align: center; max-width: 90vw;
+    .txt-input {
+      width: 100%; font-size: 1rem; padding: 12px 14px;
+      border-radius: 10px; border: 2px solid #ddd;
     }
-    .winner-trophy { font-size: 5em; margin-bottom: 20px; }
-    .ezel-emoji { font-size: 7em; margin-bottom: 20px; }
-    .celebration-title { font-size: 2.5em; margin: 0 0 10px 0; }
-    .celebration-subtitle { font-size: 2em; margin-bottom: 20px; }
 
     .history-item {
       margin-bottom: 10px; display: flex;
@@ -277,15 +306,13 @@
       gap: 8px; padding: 10px 12px; background: #f8f9fa; border-radius: 8px;
     }
     .history-item-label { flex: 1; font-size: 1rem; }
-    .history-item-edit {
-      display: flex; align-items: center; gap: 6px; flex: 1;
-    }
+    .history-item-edit { display: flex; align-items: center; gap: 6px; flex: 1; }
     .history-item-edit input[type="number"] {
       width: 70px; padding: 5px 8px; font-size: 0.95rem;
-      border-radius: 8px; border: 2px solid #4CAF50; text-align: center;
+      border-radius: 8px; border: 2px solid #0060AB; text-align: center;
     }
     .edit-history-btn {
-      color: #1a7a3e; background: none; border: none;
+      color: #008000; background: none; border: none;
       font-size: 18px; width: 32px; height: 32px;
       cursor: pointer; border-radius: 50%; display: flex;
       align-items: center; justify-content: center;
@@ -297,16 +324,6 @@
       align-items: center; justify-content: center;
     }
 
-    .confetti {
-      position: fixed; width: 12px; height: 12px;
-      pointer-events: none; z-index: 1002;
-      animation: confetti-fall 3s linear infinite;
-    }
-    @keyframes confetti-fall {
-      0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-    }
-
     @media (max-width: 768px) {
       body { font-size: 15px; }
       .player-card { padding: 10px 12px; }
@@ -315,39 +332,36 @@
   </style>
 </head>
 <body>
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 8px;">
     <h2 style="margin: 0;">Wie is de Ezel</h2>
-    <button id="presetBtn" onclick="openPresetModal()">👥＋</button>
+    <div style="display: flex; gap: 8px;">
+      <button class="icon-btn" onclick="openCloudModal()" title="Spellen historie">🗂️</button>
+      <button id="presetBtn" class="icon-btn blue" onclick="openPresetModal()" title="Spelers beheren">👥＋</button>
+    </div>
   </div>
 
-  <div id="players">
-    <p id="playerError"></p>
-  </div>
-
-  <!-- Spelers toevoegen modal -->
+  <!-- Spelers beheren modal -->
   <div id="presetModal" class="modal-background" onclick="closePresetModal(event)">
-    <div class="modal-content" style="padding: 25px; width: 90vw; max-width: 460px;" onclick="event.stopPropagation()">
+    <div class="modal-content" style="padding: 25px; width: 92vw; max-width: 460px;" onclick="event.stopPropagation()">
       <div class="modal-header">
-        <h3>👥 Speler toevoegen</h3>
+        <h3>👥 Spelers beheren</h3>
         <button class="modal-close-x" onclick="closePresetModal()">✕</button>
       </div>
-      <p style="margin: 0 0 14px 0; font-size: 0.9rem; color: #666;">Kies uit de lijst of typ een eigen naam.</p>
+      <p style="margin: 0 0 14px 0; font-size: 0.9rem; color: #666;">Kies uit de lijst of typ een eigen naam. Zelfgetypte namen komen in de lijst van dit spel.</p>
 
-      <!-- Custom name input -->
       <div style="display: flex; gap: 8px; margin-bottom: 20px;">
-        <input
-          type="text"
-          id="playerNameInput"
-          placeholder="Andere naam... (Enter)"
-          autocomplete="off"
-          style="flex: 1; font-size: 1rem; padding: 12px 14px; border-radius: 10px; border: 2px solid #ddd;"
-        />
+        <input type="text" id="playerNameInput" placeholder="Andere naam... (Enter)" autocomplete="off"
+               style="flex: 1; font-size: 1rem; padding: 12px 14px; border-radius: 10px; border: 2px solid #ddd;" />
         <button id="addPlayerBtn" onclick="addPlayer()">➕</button>
       </div>
-      <p id="playerError" style="color:#f44336; margin: -14px 0 14px 0; font-weight:500; font-size:0.9rem;"></p>
+      <p id="playerError" style="color:#D73230; margin: -14px 0 14px 0; font-weight:500; font-size:0.9rem;"></p>
 
-      <!-- Preset grid -->
       <div class="preset-grid" id="presetGrid"></div>
+
+      <button class="btn btn-blue" style="width:100%; margin-top:4px;" onclick="closePresetModal()">💾 Opslaan</button>
+
+      <hr style="border:none; border-top:1px solid #eee; margin: 16px 0;" />
+      <button class="btn btn-red" style="width:100%;" onclick="clearAll()">🔄 Nieuw spel</button>
     </div>
   </div>
 
@@ -360,25 +374,99 @@
   <h3 id="scoreHeader">📈 Scoreoverzicht</h3>
   <div id="scoreCards"></div>
 
-  <div id="actionBar">
-    <button class="btn btn-gold" onclick="showWinnerModal()" type="button">🏆 Winnaar</button>
-    <button class="btn btn-red" onclick="showEzelModal()" type="button">🐴 Ezel</button>
-    <button class="btn btn-red" onclick="clearAll()" type="button">🗑️ Clear All</button>
+  <div style="margin: 12px 0;">
+    <button class="btn btn-blue" style="width:100%;" onclick="addAllPoints()">➕ Scores toevoegen</button>
   </div>
 
-  <!-- Clear All bevestiging modal -->
-  <div id="clearAllModal" class="modal-background" onclick="cancelClearAll(event)">
-    <div class="modal-content" style="padding: 25px; width: 90vw; max-width: 380px;" onclick="event.stopPropagation()">
-      <h3 style="margin: 0 0 12px 0;">🗑️ Clear All</h3>
-      <p style="margin: 0 0 20px 0; color: #555;">Weet je zeker dat je <strong>alle spelers en scores</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.</p>
-      <div style="display: flex; gap: 10px;">
-        <button class="btn btn-red" style="flex: 1;" onclick="clearAllConfirmed()">✔ Ja, verwijder alles</button>
-        <button class="btn" style="flex: 1; background: #888;" onclick="cancelClearAll()">✕ Annuleren</button>
+  <div id="cloudBar">
+    <button class="btn btn-green" onclick="openSaveModal()" type="button">💾 Opslaan</button>
+    <button class="btn btn-blue" onclick="openCloudModal()" type="button">🗂️ Spellen</button>
+    <div id="cloudState"></div>
+  </div>
+
+  <!-- Opslaan modal -->
+  <div id="saveModal" class="modal-background" onclick="closeSaveModal(event)">
+    <div class="modal-content" style="padding: 25px; width: 92vw; max-width: 460px;" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>💾 Spel opslaan</h3>
+        <button class="modal-close-x" onclick="closeSaveModal()">✕</button>
+      </div>
+      <label style="font-size:0.95rem; color:#555; display:block; margin-bottom:6px;">Naam (optioneel)</label>
+      <input type="text" id="saveNameInput" class="txt-input" placeholder="bv. Manon weer de ezel" autocomplete="off" />
+      <p style="font-size:0.85rem; color:#666; margin:10px 0 16px 0;">Datum en tijd worden automatisch toegevoegd.</p>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-green" style="flex:1;" onclick="saveAsNewGame()">➕ Nieuw opslaan</button>
+        <button class="btn btn-blue" style="flex:1;" id="overwriteBtn" onclick="overwriteCurrentGame()">⬆️ Overschrijven</button>
+      </div>
+      <p id="saveStatus" style="margin:14px 0 0 0; font-size:0.9rem;"></p>
+    </div>
+  </div>
+
+  <!-- Spellen historie / overzicht -->
+  <div id="cloudModal" class="modal-background" onclick="closeCloudModal(event)">
+    <div class="modal-content" style="padding: 25px; width: 94vw; max-width: 640px;" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>🗂️ Spellen historie</h3>
+        <button class="modal-close-x" onclick="closeCloudModal()">✕</button>
+      </div>
+
+      <div id="gamesSummary"></div>
+
+      <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+        <input type="text" id="gameSearch" class="txt-input" style="flex:2; min-width:160px;" placeholder="🔎 Zoek op naam of speler..." oninput="renderGamesList()" />
+        <select id="gameSort" class="txt-input" style="flex:1; min-width:140px;" onchange="renderGamesList()">
+          <option value="new">Nieuwste eerst</option>
+          <option value="old">Oudste eerst</option>
+          <option value="name">Naam A-Z</option>
+          <option value="rounds">Meeste rondes</option>
+        </select>
+        <button class="btn btn-blue" style="min-width:60px;" onclick="refreshCloudModal()">🔄</button>
+      </div>
+
+      <p style="font-size:0.82rem; color:#666; margin:0 0 12px 0;">📥 laden · ✏️ hernoemen · ⬆️ overschrijven met huidige stand · 🗑️ verwijderen — allemaal vragen het wachtwoord</p>
+      <div id="gamesList"><em>Laden...</em></div>
+
+      <details id="statsDetails" style="margin-top:18px;">
+        <summary style="cursor:pointer; font-weight:600; font-size:1.05rem;">📊 Extra statistieken</summary>
+        <div id="statsTiles" style="display:flex; flex-wrap:wrap; gap:10px; margin:14px 0;"></div>
+        <div style="overflow-x:auto;">
+          <table id="statsTable"></table>
+        </div>
+      </details>
+
+      <div style="margin-top:16px; display:flex; justify-content:flex-end;">
+        <button class="btn btn-grey" onclick="forgetPassword()">🔒 Wachtwoord vergeten</button>
       </div>
     </div>
   </div>
 
+  <!-- Wachtwoord modal -->
+  <div id="pwModal" class="modal-background" onclick="cancelPw(event)">
+    <div class="modal-content" style="padding: 25px; width: 90vw; max-width: 380px;" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>🔒 Wachtwoord</h3>
+        <button class="modal-close-x" onclick="cancelPw()">✕</button>
+      </div>
+      <p id="pwReason" style="margin:0 0 12px 0; color:#555; font-size:0.95rem;"></p>
+      <input type="password" id="pwInput" class="txt-input" autocomplete="off" />
+      <div style="display:flex; gap:10px; margin-top:18px;">
+        <button class="btn btn-green" style="flex:1;" onclick="submitPw()">✔ OK</button>
+        <button class="btn btn-grey" style="flex:1;" onclick="cancelPw()">✕ Annuleren</button>
+      </div>
+    </div>
+  </div>
 
+  <!-- Clear All bevestiging -->
+  <div id="clearAllModal" class="modal-background" onclick="cancelClearAll(event)">
+    <div class="modal-content" style="padding: 25px; width: 90vw; max-width: 380px;" onclick="event.stopPropagation()">
+      <h3 style="margin: 0 0 12px 0;">🔄 Nieuw spel starten</h3>
+      <p style="margin: 0 0 20px 0; color: #555;">Weet je zeker dat je <strong>alle spelers en scores</strong> wilt verwijderen om een nieuw spel te starten? Opgeslagen spellen in de database blijven bestaan.</p>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-red" style="flex: 1;" onclick="clearAllConfirmed()">✔ Ja, verwijder alles</button>
+        <button class="btn btn-grey" style="flex: 1;" onclick="cancelClearAll()">✕ Annuleren</button>
+      </div>
+    </div>
+  </div>
 
   <div id="modalBackground" class="modal-background" onclick="closeHistoryModal(event)">
     <div id="modal" class="modal-content" onclick="event.stopPropagation()">
@@ -396,13 +484,10 @@
         <button class="modal-close-x" onclick="closeEditPlayerModal()">✕</button>
       </div>
       <label style="font-size: 0.95rem; color: #555; display: block; margin-bottom: 6px;">Naam</label>
-      <input
-        type="text"
-        id="editPlayerNameInput"
+      <input type="text" id="editPlayerNameInput"
         style="width: 100%; font-size: 1.1rem; padding: 12px 14px; border-radius: 10px; border: 2px solid #ddd; margin-bottom: 20px;"
-        autocomplete="off"
-      />
-      <p id="editPlayerError" style="color:#f44336; margin: -12px 0 14px 0; font-weight: 500; font-size: 0.9rem;"></p>
+        autocomplete="off" />
+      <p id="editPlayerError" style="color:#D73230; margin: -12px 0 14px 0; font-weight: 500; font-size: 0.9rem;"></p>
       <div id="editMainButtons" style="display: flex; flex-direction: column; gap: 10px;">
         <div style="display: flex; gap: 10px;">
           <button class="btn btn-green" style="flex: 1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:10px;" onclick="savePlayerName()"><span>💾</span><span style="font-size:0.85rem;">Opslaan</span></button>
@@ -410,37 +495,29 @@
         </div>
       </div>
       <div id="editConfirmRow" style="display: none; flex-direction: column; gap: 10px;">
-        <p style="margin: 0 0 6px 0; font-weight: 500; color: #c0392b;">Zeker weten? Dit kan niet ongedaan worden gemaakt.</p>
+        <p style="margin: 0 0 6px 0; font-weight: 500; color: #D73230;">Zeker weten? Dit kan niet ongedaan worden gemaakt.</p>
         <div style="display: flex; gap: 10px;">
           <button class="btn btn-red" style="flex: 1;" onclick="deletePlayerConfirmed()">✔ Ja, verwijder</button>
-          <button class="btn" style="flex: 1; background: #888;" onclick="cancelDelete()">✕ Annuleren</button>
+          <button class="btn btn-grey" style="flex: 1;" onclick="cancelDelete()">✕ Annuleren</button>
         </div>
       </div>
     </div>
   </div>
 
-  <div id="winnerModal" class="modal-background" onclick="closeCelebrationModal(event)">
-    <div class="celebration-content modal-content" onclick="event.stopPropagation()">
-      <div class="winner-trophy">🏆</div>
-      <h2 class="celebration-title">Gefeliciteerd!</h2>
-      <div class="celebration-subtitle" id="winnerName">Winnaar</div>
-      <div style="font-size: 2em; margin-bottom: 30px;" id="winnerScore">-</div>
-      <button class="btn btn-gold" onclick="closeCelebrationModal()">🎉 Sluiten</button>
-    </div>
-  </div>
-
-  <div id="ezelModal" class="modal-background" onclick="closeCelebrationModal(event)">
-    <div class="celebration-content modal-content" onclick="event.stopPropagation()">
-      <div class="ezel-emoji">🐴</div>
-      <h2 class="celebration-title">Ezel van de dag!</h2>
-      <div class="celebration-subtitle" id="ezelName">Ezel</div>
-      <div style="font-size: 2em; margin-bottom: 30px;" id="ezelScore">-</div>
-      <button class="btn btn-red" onclick="closeCelebrationModal()">😅 Sluiten</button>
-    </div>
-  </div>
+  <div id="toast"></div>
 
   <script>
+    /* ═══════════ Config ═══════════ */
+    /* >>> PLAK HIER DE /exec URL VAN JE APPS SCRIPT WEB-APP <<< */
+    const API_URL = 'https://script.google.com/macros/s/AKfycbw05k1G8Axe0sV28HUaYGV_vyQ9VvVLcofohsuWr7rOsRdvlbUrMLQUHYKvLK2lKpc/exec';
+
+    let storedPw = localStorage.getItem('ezelPw') || '';
+    let currentGameId = localStorage.getItem('ezelCurrentGameId') || null;
+    let currentGameName = localStorage.getItem('ezelCurrentGameName') || '';
+    let gamesCache = [];
+
     let players = [];
+    let customNames = JSON.parse(localStorage.getItem('ezelCustomNames') || '[]');
     let insertionCount = 0;
     let modalOpenForIndex = null;
     let scoreSortAsc = true;
@@ -450,22 +527,427 @@
       'Ben', 'Evelien', 'Hilde', 'Maarten W.', 'Maarten O.', 'Manon', 'Mieke', 'Sander', 'Sacha', 'Yärnn'
     ];
 
+    /* ═══════════ Toast ═══════════ */
+    let toastTimer = null;
+    function toast(msg, kind) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'show ' + (kind || '');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { t.className = ''; }, 3500);
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function fmtDate(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return String(iso);
+      return d.toLocaleString('nl-BE', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    }
+
+    /* ═══════════ API ═══════════ */
+    async function api(payload) {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload),
+        redirect: 'follow'
+      });
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); }
+      catch (e) { throw new Error('Onverwacht antwoord van de server. Staat de web-app op "Iedereen"?'); }
+      if (!data.ok) throw new Error(data.error || 'Onbekende fout');
+      return data;
+    }
+
+    /* ═══════════ Wachtwoord (localStorage) ═══════════ */
+    let pwResolve = null;
+    function askPassword(reason) {
+      return new Promise(resolve => {
+        if (storedPw) { resolve(storedPw); return; }
+        pwResolve = resolve;
+        document.getElementById('pwReason').textContent = reason || '';
+        document.getElementById('pwInput').value = '';
+        document.getElementById('pwModal').style.display = 'flex';
+        setTimeout(() => document.getElementById('pwInput').focus(), 100);
+      });
+    }
+    function submitPw() {
+      const v = document.getElementById('pwInput').value;
+      document.getElementById('pwModal').style.display = 'none';
+      if (pwResolve) { const r = pwResolve; pwResolve = null; r(v); }
+    }
+    function cancelPw(e) {
+      if (e && e.target && e.target.id !== 'pwModal' && e.target.tagName !== 'BUTTON') return;
+      document.getElementById('pwModal').style.display = 'none';
+      if (pwResolve) { const r = pwResolve; pwResolve = null; r(null); }
+    }
+    function rememberPw(pw) {
+      storedPw = pw;
+      localStorage.setItem('ezelPw', pw);
+    }
+    function forgetPassword() {
+      storedPw = '';
+      localStorage.removeItem('ezelPw');
+      toast('🔒 Wachtwoord gewist.', 'ok');
+    }
+    function handleApiError(err) {
+      const msg = String(err.message || err);
+      if (msg.toLowerCase().indexOf('wachtwoord') !== -1) {
+        storedPw = '';
+        localStorage.removeItem('ezelPw');
+      }
+      toast('⚠️ ' + msg, 'err');
+    }
+
+    /* ═══════════ Huidig spel ═══════════ */
+    function updateCloudState() {
+      const el = document.getElementById('cloudState');
+      el.innerHTML = currentGameId
+        ? 'Huidig spel: <b>' + escapeHtml(currentGameName || currentGameId) + '</b>'
+        : 'Nog niet opgeslagen als spel.';
+    }
+
+    function setCurrentGame(id, name) {
+      currentGameId = id || null;
+      currentGameName = name || '';
+      if (id) {
+        localStorage.setItem('ezelCurrentGameId', id);
+        localStorage.setItem('ezelCurrentGameName', currentGameName);
+      } else {
+        localStorage.removeItem('ezelCurrentGameId');
+        localStorage.removeItem('ezelCurrentGameName');
+      }
+      updateCloudState();
+    }
+
+    /* ═══════════ Opslaan ═══════════ */
+    function openSaveModal() {
+      if (!players.length) { toast('Geen spelers om op te slaan.', 'err'); return; }
+      document.getElementById('saveNameInput').value = currentGameName || '';
+      document.getElementById('saveStatus').textContent = '';
+      document.getElementById('overwriteBtn').disabled = !currentGameId;
+      document.getElementById('saveModal').style.display = 'flex';
+    }
+    function closeSaveModal(e) {
+      if (e && e.target.id !== 'saveModal') return;
+      document.getElementById('saveModal').style.display = 'none';
+    }
+
+    async function saveAsNewGame() {
+      if (hasPendingRoundInput() && !addAllPoints()) {
+        toast('⚠️ Vul alle scores in (of maak ze leeg) om de lopende ronde te verwerken.', 'err');
+        return;
+      }
+      const name = document.getElementById('saveNameInput').value.trim();
+      const st = document.getElementById('saveStatus');
+      st.textContent = 'Opslaan...';
+      try {
+        const r = await api({ action: 'save', name: name, players: players });
+        setCurrentGame(r.id, name || fmtDate(r.datetime));
+        st.textContent = '';
+        document.getElementById('saveModal').style.display = 'none';
+        toast('✅ Opgeslagen op ' + fmtDate(r.datetime), 'ok');
+      } catch (err) { st.textContent = ''; handleApiError(err); }
+    }
+
+    async function overwriteCurrentGame() {
+      if (!currentGameId) return;
+      if (hasPendingRoundInput() && !addAllPoints()) {
+        toast('⚠️ Vul alle scores in (of maak ze leeg) om de lopende ronde te verwerken.', 'err');
+        return;
+      }
+      const name = document.getElementById('saveNameInput').value.trim();
+      const st = document.getElementById('saveStatus');
+      st.textContent = 'Overschrijven...';
+      try {
+        // Het huidige, actieve spel overschrijven vereist geen wachtwoord.
+        await api({ action: 'update', id: currentGameId, name: name, players: players, skipAuth: true });
+        setCurrentGame(currentGameId, name || currentGameName);
+        st.textContent = '';
+        document.getElementById('saveModal').style.display = 'none';
+        toast('✅ Spel bijgewerkt.', 'ok');
+      } catch (err) { st.textContent = ''; handleApiError(err); }
+    }
+
+    /* ═══════════ Spellen overzicht ═══════════ */
+    function openCloudModal() {
+      document.getElementById('cloudModal').style.display = 'flex';
+      refreshCloudModal();
+    }
+    function closeCloudModal(e) {
+      if (e && e.target.id !== 'cloudModal') return;
+      document.getElementById('cloudModal').style.display = 'none';
+    }
+
+    function refreshCloudModal() {
+      loadGamesList();
+      loadStats();
+    }
+
+    async function loadGamesList() {
+      const list = document.getElementById('gamesList');
+      list.innerHTML = '<em>Laden...</em>';
+      try {
+        const r = await api({ action: 'list' });
+        gamesCache = r.games || [];
+        renderSummary();
+        renderGamesList();
+      } catch (err) {
+        document.getElementById('gamesSummary').innerHTML = '';
+        list.innerHTML = '<em style="color:#D73230;">' + escapeHtml(err.message) + '</em>';
+      }
+    }
+
+    function renderSummary() {
+      const el = document.getElementById('gamesSummary');
+      if (!gamesCache.length) { el.innerHTML = ''; return; }
+      const totalRounds = gamesCache.reduce((s, g) => s + (g.rounds || 0), 0);
+      const last = gamesCache.map(g => g.datetime).sort().slice(-1)[0];
+
+      const ezelCount = {};
+      gamesCache.forEach(g => {
+        String(g.ezel || '').replace(/\s*\(\d+\)\s*$/, '').split(',').forEach(n => {
+          n = n.trim();
+          if (n) ezelCount[n] = (ezelCount[n] || 0) + 1;
+        });
+      });
+      const topEzel = Object.keys(ezelCount).sort((a, b) => ezelCount[b] - ezelCount[a])[0];
+
+      const winCount = {};
+      gamesCache.forEach(g => {
+        String(g.winner || '').replace(/\s*\(\d+\)\s*$/, '').split(',').forEach(n => {
+          n = n.trim();
+          if (n) winCount[n] = (winCount[n] || 0) + 1;
+        });
+      });
+      const topWin = Object.keys(winCount).sort((a, b) => winCount[b] - winCount[a])[0];
+
+      el.innerHTML = `
+        <div class="summary-tile"><div class="v">${gamesCache.length}</div><div class="l">spellen</div></div>
+        <div class="summary-tile"><div class="v">${totalRounds}</div><div class="l">rondes totaal</div></div>
+        <div class="summary-tile"><div class="v">🏆 ${escapeHtml(topWin || '-')}</div><div class="l">meeste winst (${topWin ? winCount[topWin] : 0})</div></div>
+        <div class="summary-tile"><div class="v">🐴 ${escapeHtml(topEzel || '-')}</div><div class="l">vaakste ezel (${topEzel ? ezelCount[topEzel] : 0})</div></div>
+        <div class="summary-tile" style="flex-basis:100%;"><div class="l">laatste spel: ${escapeHtml(fmtDate(last))}</div></div>`;
+    }
+
+    function renderGamesList() {
+      const list = document.getElementById('gamesList');
+      const q = (document.getElementById('gameSearch').value || '').toLowerCase().trim();
+      const sort = document.getElementById('gameSort').value;
+
+      let games = gamesCache.slice();
+      if (q) {
+        games = games.filter(g =>
+          (g.name || '').toLowerCase().includes(q) ||
+          (g.winner || '').toLowerCase().includes(q) ||
+          (g.ezel || '').toLowerCase().includes(q)
+        );
+      }
+      if (sort === 'new')        games.sort((a, b) => String(b.datetime).localeCompare(String(a.datetime)));
+      else if (sort === 'old')   games.sort((a, b) => String(a.datetime).localeCompare(String(b.datetime)));
+      else if (sort === 'name')  games.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      else if (sort === 'rounds')games.sort((a, b) => (b.rounds || 0) - (a.rounds || 0));
+
+      list.innerHTML = '';
+      if (!games.length) { list.innerHTML = '<em>Geen spellen gevonden.</em>'; return; }
+
+      games.forEach(g => {
+        const div = document.createElement('div');
+        div.className = 'game-item' + (g.id === currentGameId ? ' active' : '');
+        div.innerHTML = `
+          <div class="game-meta">
+            <span class="g-name">${escapeHtml(g.name)}</span>
+            <small>📅 ${escapeHtml(fmtDate(g.datetime))} · 👥 ${g.playerCount} · 🔁 ${g.rounds} rondes</small>
+            <small>🏆 ${escapeHtml(g.winner)} · 🐴 ${escapeHtml(g.ezel)}</small>
+          </div>
+          <div class="game-actions">
+            <button title="Laden" onclick="loadGame('${g.id}')">📥</button>
+            <button title="Hernoemen" onclick="renameGame('${g.id}')">✏️</button>
+            <button title="Overschrijven met huidige stand" onclick="overwriteGame('${g.id}')">⬆️</button>
+            <button title="Verwijderen" onclick="deleteGame('${g.id}')">🗑️</button>
+          </div>`;
+        list.appendChild(div);
+      });
+    }
+
+    function statTile(label, valueHtml) {
+      return `<div class="summary-tile"><div class="v">${valueHtml}</div><div class="l">${label}</div></div>`;
+    }
+
+    async function loadStats() {
+      const tilesEl = document.getElementById('statsTiles');
+      const tableEl = document.getElementById('statsTable');
+      tilesEl.innerHTML = '<em>Laden...</em>';
+      tableEl.innerHTML = '';
+      try {
+        const r = await api({ action: 'stats' });
+        renderStats(r.stats);
+      } catch (err) {
+        tilesEl.innerHTML = '<em style="color:#D73230;">' + escapeHtml(err.message) + '</em>';
+      }
+    }
+
+    function renderStats(stats) {
+      const tilesEl = document.getElementById('statsTiles');
+      const tableEl = document.getElementById('statsTable');
+      if (!stats) { tilesEl.innerHTML = '<em>Nog geen data.</em>'; tableEl.innerHTML = ''; return; }
+
+      let tiles = '';
+      if (stats.bestMargin) {
+        tiles += statTile(
+          `Grootste marge · ${stats.bestMargin.margin} pt<br><small>${escapeHtml(stats.bestMargin.gameName)} · ${escapeHtml(fmtDate(stats.bestMargin.date))}</small>`,
+          `🏆 ${escapeHtml(stats.bestMargin.winner)}<br>🐴 ${escapeHtml(stats.bestMargin.ezel)}`
+        );
+      }
+      if (stats.bestComeback) {
+        tiles += statTile(
+          `Grootste comeback<br><small>${escapeHtml(stats.bestComeback.gameName)} · ${escapeHtml(fmtDate(stats.bestComeback.date))}</small>`,
+          `${escapeHtml(stats.bestComeback.player)}<br><small>rang ${stats.bestComeback.halfwayRank} → ${stats.bestComeback.finalRank}</small>`
+        );
+      }
+      if (stats.worstDecline) {
+        tiles += statTile(
+          `Grootste inzinking<br><small>${escapeHtml(stats.worstDecline.gameName)} · ${escapeHtml(fmtDate(stats.worstDecline.date))}</small>`,
+          `${escapeHtml(stats.worstDecline.player)}<br><small>rang ${stats.worstDecline.halfwayRank} → ${stats.worstDecline.finalRank}</small>`
+        );
+      }
+      if (stats.rivalry) {
+        const rv = stats.rivalry;
+        tiles += statTile(
+          `Grootste rivaliteit<br><small>${rv.count}x samen gespeeld${rv.ties ? ' · ' + rv.ties + 'x gelijk' : ''}</small>`,
+          `${escapeHtml(rv.a)} ${rv.aWins} - ${rv.bWins} ${escapeHtml(rv.b)}`
+        );
+      }
+      tilesEl.innerHTML = tiles || '<em>Nog niet genoeg data voor deze statistieken.</em>';
+
+      const rows = (stats.players || []).slice().sort((a, b) => (a.avgPerRound ?? 999) - (b.avgPerRound ?? 999));
+      let html = `<tr>
+        <th>Speler</th><th>Spellen</th><th>Gem. pt/ronde</th>
+        <th>Win%</th><th>Ezel%</th><th>Beste winreeks</th><th>Beste ezelreeks</th><th>Trend</th>
+      </tr>`;
+      rows.forEach(p => {
+        const trendIcon = p.trend === 'verbetert' ? '📈' : (p.trend === 'verslechtert' ? '📉' : '➖');
+        html += `<tr>
+          <td>${escapeHtml(p.name)}</td>
+          <td>${p.gamesPlayed}</td>
+          <td>${p.avgPerRound !== null ? p.avgPerRound.toFixed(2) : '-'}</td>
+          <td>${p.winPct.toFixed(0)}% (${p.winCount})</td>
+          <td>${p.ezelPct.toFixed(0)}% (${p.ezelCount})</td>
+          <td>${p.bestWinStreak}</td>
+          <td>${p.bestEzelStreak}</td>
+          <td>${trendIcon} ${p.trend}</td>
+        </tr>`;
+      });
+      tableEl.innerHTML = html;
+    }
+
+    async function loadGame(id) {
+      if (players.length && !confirm('Huidige stand vervangen door dit opgeslagen spel?')) return;
+      const pw = await askPassword('Een historisch spel laden vereist het wachtwoord.');
+      if (pw === null) return;
+      try {
+        const r = await api({ action: 'get', id: id, password: pw });
+        rememberPw(pw);
+        players = (r.game.players || []).map((p, i) => ({
+          name: p.name,
+          points: (p.history || []).reduce((s, v) => s + v, 0),
+          history: p.history || [],
+          insertionIndex: typeof p.insertionIndex === 'number' ? p.insertionIndex : i
+        }));
+        insertionCount = players.reduce((max, p) => Math.max(max, p.insertionIndex ?? 0), -1) + 1;
+        players.forEach(p => addCustomName(p.name));
+        savePlayers();
+        renderCards();
+        setCurrentGame(r.game.id, r.game.name);
+        renderGamesList();
+        document.getElementById('cloudModal').style.display = 'none';
+        toast('📥 Spel geladen.', 'ok');
+      } catch (err) { handleApiError(err); }
+    }
+
+    async function renameGame(id) {
+      const g = gamesCache.find(x => x.id === id);
+      const newName = prompt('Nieuwe naam:', g ? g.name : '');
+      if (newName === null || !newName.trim()) return;
+      const pw = await askPassword('Hernoemen vereist het wachtwoord.');
+      if (pw === null) return;
+      try {
+        await api({ action: 'update', id: id, name: newName.trim(), password: pw });
+        rememberPw(pw);
+        if (id === currentGameId) setCurrentGame(id, newName.trim());
+        await loadGamesList();
+        toast('✅ Hernoemd.', 'ok');
+      } catch (err) { handleApiError(err); }
+    }
+
+    async function overwriteGame(id) {
+      if (!players.length) { toast('Geen spelers om op te slaan.', 'err'); return; }
+      if (hasPendingRoundInput() && !addAllPoints()) {
+        toast('⚠️ Vul alle scores in (of maak ze leeg) om de lopende ronde te verwerken.', 'err');
+        return;
+      }
+      const pw = await askPassword('Overschrijven vereist het wachtwoord.');
+      if (pw === null) return;
+      try {
+        await api({ action: 'update', id: id, players: players, password: pw });
+        rememberPw(pw);
+        const g = gamesCache.find(x => x.id === id);
+        setCurrentGame(id, g ? g.name : currentGameName);
+        await loadGamesList();
+        toast('✅ Overschreven met huidige stand.', 'ok');
+      } catch (err) { handleApiError(err); }
+    }
+
+    async function deleteGame(id) {
+      const g = gamesCache.find(x => x.id === id);
+      if (!confirm('Spel "' + (g ? g.name : id) + '" definitief verwijderen uit de database?')) return;
+      const pw = await askPassword('Verwijderen vereist het wachtwoord.');
+      if (pw === null) return;
+      try {
+        await api({ action: 'delete', id: id, password: pw });
+        rememberPw(pw);
+        if (id === currentGameId) setCurrentGame(null, '');
+        await loadGamesList();
+        toast('🗑️ Verwijderd.', 'ok');
+      } catch (err) { handleApiError(err); }
+    }
+
+    /* ═══════════ Spelers ═══════════ */
+    function saveCustomNames() {
+      localStorage.setItem('ezelCustomNames', JSON.stringify(customNames));
+    }
+
+    function addCustomName(name) {
+      const exists = PRESET_NAMES.concat(customNames)
+        .some(n => n.toLowerCase() === name.toLowerCase());
+      if (!exists) { customNames.push(name); saveCustomNames(); }
+    }
+
+    function allNames() {
+      return PRESET_NAMES.concat(customNames.slice().sort((a, b) => a.localeCompare(b)));
+    }
+
     function refreshPresetGrid() {
       const grid = document.getElementById('presetGrid');
       if (!grid) return;
       grid.innerHTML = '';
-      PRESET_NAMES.forEach(name => {
+      allNames().forEach(name => {
+        const isCustom = PRESET_NAMES.indexOf(name) === -1;
         const alreadyAdded = players.some(p => p.name.toLowerCase() === name.toLowerCase());
         const btn = document.createElement('button');
-        btn.className = 'preset-name-btn' + (alreadyAdded ? ' already-added' : '');
+        btn.className = 'preset-name-btn' + (alreadyAdded ? ' already-added' : '') + (isCustom ? ' custom' : '');
         btn.textContent = name;
         btn.disabled = alreadyAdded;
         btn.onclick = () => {
           players.push({ name, points: 0, history: [], insertionIndex: insertionCount++ });
           savePlayers();
           renderCards();
-          btn.classList.add('already-added');
-          btn.disabled = true;
+          refreshPresetGrid();
         };
         grid.appendChild(btn);
       });
@@ -473,25 +955,13 @@
 
     function openPresetModal() {
       refreshPresetGrid();
+      document.getElementById('playerError').textContent = '';
       document.getElementById('presetModal').style.display = 'flex';
     }
 
     function closePresetModal(e) {
       if (e && e.target.id !== 'presetModal') return;
       document.getElementById('presetModal').style.display = 'none';
-    }
-
-    function createConfetti() {
-      for (let i = 0; i < 80; i++) {
-        const confetti = document.createElement('div');
-        confetti.className = 'confetti';
-        confetti.style.left = Math.random() * 100 + 'vw';
-        confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
-        confetti.style.animationDelay = Math.random() * 3 + 's';
-        confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
-        document.body.appendChild(confetti);
-        setTimeout(() => confetti.remove(), 5000);
-      }
     }
 
     window.onload = function () {
@@ -501,6 +971,7 @@
         insertionCount = players.reduce((max, p) => Math.max(max, p.insertionIndex ?? 0), -1) + 1;
       }
       renderCards();
+      updateCloudState();
     };
 
     function savePlayers() {
@@ -516,6 +987,12 @@
       document.getElementById('editPlayerNameInput').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') { e.preventDefault(); savePlayerName(); }
       });
+      document.getElementById('pwInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); submitPw(); }
+      });
+      document.getElementById('saveNameInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); saveAsNewGame(); }
+      });
     });
 
     function addPlayerLogic() {
@@ -528,19 +1005,11 @@
       }
       errorMsg.textContent = '';
       players.push({ name, points: 0, history: [], insertionIndex: insertionCount++ });
+      addCustomName(name);
       input.value = '';
       savePlayers();
       renderCards();
       refreshPresetGrid();
-    }
-
-    function removePlayer(index) {
-      if (confirm(`Weet je zeker dat je speler "${players[index].name}" wilt verwijderen?`)) {
-        players.splice(index, 1);
-        savePlayers();
-        renderCards();
-        closeHistoryModal();
-      }
     }
 
     function openEditPlayerModal(index) {
@@ -568,6 +1037,7 @@
         errorMsg.textContent = 'Naam moet uniek zijn.'; return;
       }
       players[editPlayerIndex].name = newName;
+      addCustomName(newName);
       savePlayers();
       renderCards();
       document.getElementById('editPlayerModal').style.display = 'none';
@@ -598,22 +1068,23 @@
 
     function clearAllConfirmed() {
       players = [];
+      customNames = [];
       insertionCount = 0;
       localStorage.removeItem('ezelplayers');
+      localStorage.removeItem('ezelCustomNames');
+      setCurrentGame(null, '');
       renderCards();
+      refreshPresetGrid();
       document.getElementById('clearAllModal').style.display = 'none';
+      // Speler-modal blijft open zodat direct spelers voor het nieuwe spel toegevoegd kunnen worden.
     }
 
     function cancelClearAll(e) {
-      if (e && e.target.id !== 'clearAllModal') return;
+      if (e && e.target.id !== 'clearAllModal' && e.target.tagName !== 'BUTTON') return;
       document.getElementById('clearAllModal').style.display = 'none';
     }
 
-    function addAllPointsOnEnter(event) {
-      if (event.key !== 'Enter') return;
-      event.preventDefault();
-
-      // Check all inputs are filled with a valid non-negative number
+    function addAllPoints() {
       const missing = players.some((p, i) => {
         const inp = document.getElementById('pointsInput-' + i);
         if (!inp) return false;
@@ -623,17 +1094,16 @@
       });
 
       if (missing) {
-        // Highlight empty inputs
         players.forEach((p, i) => {
           const inp = document.getElementById('pointsInput-' + i);
           if (!inp) return;
           const val = inp.value.trim();
           if (!val || isNaN(parseInt(val, 10)) || parseInt(val, 10) < 0) {
-            inp.style.borderColor = '#f44336';
+            inp.style.borderColor = '#D73230';
             setTimeout(() => { inp.style.borderColor = ''; }, 1500);
           }
         });
-        return;
+        return false;
       }
 
       players.forEach((p, i) => {
@@ -645,6 +1115,20 @@
       });
       savePlayers();
       renderCards();
+      return true;
+    }
+
+    function hasPendingRoundInput() {
+      return players.some((p, i) => {
+        const inp = document.getElementById('pointsInput-' + i);
+        return inp && inp.value.trim() !== '';
+      });
+    }
+
+    function addAllPointsOnEnter(event) {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      addAllPoints();
     }
 
     function openHistoryModal(index) {
@@ -660,7 +1144,7 @@
           <input type="number" id="modalAddInput" min="0" placeholder="Score toevoegen..." style="flex:1; min-width:0; width:0; font-size:1rem; padding:10px 12px; border-radius:10px; border:2px solid #ddd; box-sizing:border-box;" />
           <button class="btn btn-green" style="padding:10px 14px; flex-shrink:0;" onclick="addHistoryFromModal()">➕</button>
         </div>
-        <p id="modalAddError" style="color:#f44336; margin:6px 0 0 0; font-size:0.9rem; font-weight:500;"></p>`;
+        <p id="modalAddError" style="color:#D73230; margin:6px 0 0 0; font-size:0.9rem; font-weight:500;"></p>`;
       document.getElementById('modalPlayerName').textContent = players[index].name;
       document.getElementById('modalAddInput').addEventListener('keydown', e => {
         if (e.key === 'Enter') { e.preventDefault(); addHistoryFromModal(); }
@@ -701,8 +1185,8 @@
             <button class="remove-history-btn" title="Verwijder" onclick="askRemoveHistory(${pIdx},${hIdx})">✖</button>
           </div>
           <div id="histConfirm-${hIdx}" style="display:none; align-items:center; gap:6px;">
-            <span style="font-size:0.85rem; color:#c0392b; font-weight:500;">Verwijderen?</span>
-            <button class="edit-history-btn" title="Ja" onclick="removeHistoryPoint(${pIdx},${hIdx})" style="color:#1a7a3e;">✔</button>
+            <span style="font-size:0.85rem; color:#D73230; font-weight:500;">Verwijderen?</span>
+            <button class="edit-history-btn" title="Ja" onclick="removeHistoryPoint(${pIdx},${hIdx})" style="color:#008000;">✔</button>
             <button class="remove-history-btn" title="Nee" onclick="cancelRemoveHistory(${hIdx})">✖</button>
           </div>`;
         container.appendChild(div);
@@ -729,8 +1213,7 @@
     function saveEditHistory(pIdx, hIdx) {
       const inp = document.getElementById(`histEditInput-${hIdx}`);
       const newVal = parseInt(inp.value, 10);
-      if (isNaN(newVal) || newVal < 0) { inp.style.borderColor = '#f44336'; return; }
-      const oldVal = players[pIdx].history[hIdx];
+      if (isNaN(newVal) || newVal < 0) { inp.style.borderColor = '#D73230'; return; }
       players[pIdx].history[hIdx] = newVal;
       players[pIdx].points = players[pIdx].history.reduce((sum, v) => sum + v, 0);
       savePlayers();
@@ -742,15 +1225,6 @@
       if (e && e.target.id && e.target.id !== 'modalBackground') return;
       document.getElementById('modalBackground').style.display = 'none';
       modalOpenForIndex = null;
-    }
-
-    function closeCelebrationModal(e) {
-      if (e && e.target.classList && !e.target.classList.contains('modal-background')) {
-        if (e.target.closest('.modal-background') == null) return;
-      }
-      document.getElementById('winnerModal').style.display = 'none';
-      document.getElementById('ezelModal').style.display = 'none';
-      document.querySelectorAll('.confetti').forEach(c => c.remove());
     }
 
     function askRemoveHistory(pIdx, hIdx) {
@@ -771,23 +1245,16 @@
       renderHistoryItems(pIdx);
     }
 
-    /* ── Build diff badge HTML ── */
     function diffBadgeHTML(diff) {
-      if (diff === 0) {
-        return `<span class="diff-badge equal">= gelijk</span>`;
-      } else if (diff > 0) {
-        /* this player has MORE points = worse in Ezel (lower is better) */
-        return `<span class="diff-badge worse">▲ +${diff}</span>`;
-      } else {
-        return `<span class="diff-badge better">▼ ${diff}</span>`;
-      }
+      if (diff === 0) return `<span class="diff-badge equal">= gelijk</span>`;
+      if (diff > 0)   return `<span class="diff-badge worse">▲ +${diff}</span>`;
+      return `<span class="diff-badge better">▼ ${diff}</span>`;
     }
 
     function renderCards() {
       const container = document.getElementById('scoreCards');
       container.innerHTML = '';
 
-      // Update header with round count
       const rounds = players.length ? Math.max(...players.map(p => p.history.length)) : 0;
       const header = document.getElementById('scoreHeader');
       if (header) {
@@ -801,8 +1268,6 @@
         return;
       }
       players.forEach((p, i) => {
-
-        /* ── Diff connector between cards ── */
         if (i > 0) {
           const diff = p.points - players[i - 1].points;
           const connectorDiv = document.createElement('div');
@@ -836,35 +1301,6 @@
       });
     }
 
-    function showWinnerModal() {
-      if (players.length === 0) { alert('Geen spelers.'); return; }
-      const minPunten = Math.min(...players.map(p => p.points));
-      const winnaars = players.filter(p => p.points === minPunten);
-      const nameEl = document.getElementById('winnerName');
-      if (winnaars.length === 1) {
-        nameEl.textContent = winnaars[0].name;
-      } else {
-        nameEl.innerHTML = winnaars.map(w => `<div>${w.name}</div>`).join('');
-      }
-      document.getElementById('winnerScore').textContent = `${minPunten} punten`;
-      document.getElementById('winnerModal').style.display = 'flex';
-      createConfetti();
-    }
-
-    function showEzelModal() {
-      if (players.length === 0) { alert('Geen spelers.'); return; }
-      const maxPunten = Math.max(...players.map(p => p.points));
-      const ezels = players.filter(p => p.points === maxPunten);
-      const nameEl = document.getElementById('ezelName');
-      if (ezels.length === 1) {
-        nameEl.textContent = ezels[0].name;
-      } else {
-        nameEl.innerHTML = ezels.map(e => `<div>${e.name}</div>`).join('');
-      }
-      document.getElementById('ezelScore').textContent = `${maxPunten} punten`;
-      document.getElementById('ezelModal').style.display = 'flex';
-    }
-
     function sortPlayers(criteria) {
       const scoreBtn = document.querySelector('#sortControls .btn[data-sort="score"]');
       if (criteria === 'score') {
@@ -894,3 +1330,4 @@
   </script>
 </body>
 </html>
+ 
