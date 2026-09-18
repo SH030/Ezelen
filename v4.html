@@ -26,7 +26,7 @@
       border-radius: 10px;
       border: none;
       cursor: pointer;
-      background: #4CAF50;
+      background: #0060AB;
       color: #fff;
       display: flex;
       align-items: center;
@@ -34,7 +34,7 @@
       flex-shrink: 0;
     }
     .icon-btn:hover { opacity: 0.9; }
-    .icon-btn.blue { background: #2f80ed; }
+    .icon-btn.blue { background: #F69755; color: #fff; }
 
     #addPlayerBtn {
       padding: 12px 16px;
@@ -44,7 +44,7 @@
       border-radius: 8px;
       border: none;
       cursor: pointer;
-      background: #4CAF50;
+      background: #0060AB;
       color: #fff;
       font-weight: 500;
     }
@@ -65,7 +65,7 @@
       text-align: center;
       transition: all 0.15s;
     }
-    .preset-name-btn:hover { background: #e3f2fd; border-color: #90caf9; }
+    .preset-name-btn:hover { background: #e8f1f8; border-color: #0060AB; }
     .preset-name-btn.already-added {
       opacity: 0.4;
       cursor: not-allowed;
@@ -85,7 +85,7 @@
       font-size: 0.95rem;
       border-radius: 8px;
       border: none;
-      background: #4CAF50;
+      background: #0060AB;
       color: #fff;
       font-weight: 500;
     }
@@ -115,11 +115,11 @@
       padding: 4px 6px;
       border-radius: 6px;
       user-select: none;
-      color: #007bff;
+      color: #0060AB;
       text-decoration: underline;
       text-underline-offset: 2px;
     }
-    .player-name:hover { color: #0056b3; background: #e8f0fe; }
+    .player-name:hover { color: #004a85; background: #e8f1f8; }
 
     .player-right {
       display: flex;
@@ -129,7 +129,7 @@
     }
     .player-points {
       cursor: pointer;
-      color: #007bff;
+      color: #0060AB;
       font-weight: 600;
       user-select: none;
     }
@@ -165,8 +165,8 @@
       letter-spacing: 0.02em;
       white-space: nowrap;
     }
-    .diff-badge.worse { background: #ffeaea; color: #c0392b; border: 1px solid #f5c6c6; }
-    .diff-badge.better { background: #e9f7ef; color: #1a7a3e; border: 1px solid #b2dfcc; }
+    .diff-badge.worse { background: #fbeceb; color: #D73230; border: 1px solid #eeb6b5; }
+    .diff-badge.better { background: #e6f2e6; color: #008000; border: 1px solid #008000; }
     .diff-badge.equal { background: #f0f0f0; color: #666; border: 1px solid #ddd; }
 
     /* Buttons */
@@ -186,10 +186,11 @@
     }
     button.btn:hover, button.btn:active { opacity: 0.9; transform: translateY(-1px); }
     button.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    .btn-green { background-color: #4CAF50; }
-    .btn-red   { background-color: #f44336; }
-    .btn-blue  { background-color: #2f80ed; }
+    .btn-green { background-color: #008000; }
+    .btn-red   { background-color: #D73230; }
+    .btn-blue  { background-color: #0060AB; }
     .btn-grey  { background-color: #7f8c9b; }
+    .btn-orange{ background-color: #F69755; color: #0060AB; }
 
     #cloudBar {
       display: flex;
@@ -216,7 +217,7 @@
       background: #f2f5f9; border-radius: 10px;
       padding: 10px 12px; text-align: center;
     }
-    .summary-tile .v { font-size: 1.35rem; font-weight: 700; color: #2f80ed; }
+    .summary-tile .v { font-size: 1.35rem; font-weight: 700; color: #0060AB; }
     .summary-tile .l { font-size: 0.78rem; color: #666; }
     .summary-tile small { font-size: 0.7rem; color: #888; }
 
@@ -235,7 +236,7 @@
       margin-bottom: 10px;
       flex-wrap: wrap;
     }
-    .game-item.active { outline: 2px solid #2f80ed; background: #eaf2fd; }
+    .game-item.active { outline: 2px solid #0060AB; background: #e8f1f8; }
     .game-meta { flex: 1; min-width: 180px; display: flex; flex-direction: column; gap: 2px; }
     .game-meta .g-name { font-weight: 600; }
     .game-meta small { color: #666; font-size: 0.82rem; }
@@ -265,8 +266,8 @@
       text-align: center;
     }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    #toast.err { background: #c0392b; }
-    #toast.ok  { background: #1a7a3e; }
+    #toast.err { background: #D73230; }
+    #toast.ok  { background: #008000; }
 
     .modal-background {
       display: none; position: fixed; top: 0; left: 0;
@@ -308,10 +309,10 @@
     .history-item-edit { display: flex; align-items: center; gap: 6px; flex: 1; }
     .history-item-edit input[type="number"] {
       width: 70px; padding: 5px 8px; font-size: 0.95rem;
-      border-radius: 8px; border: 2px solid #4CAF50; text-align: center;
+      border-radius: 8px; border: 2px solid #0060AB; text-align: center;
     }
     .edit-history-btn {
-      color: #1a7a3e; background: none; border: none;
+      color: #008000; background: none; border: none;
       font-size: 18px; width: 32px; height: 32px;
       cursor: pointer; border-radius: 50%; display: flex;
       align-items: center; justify-content: center;
@@ -353,12 +354,15 @@
                style="flex: 1; font-size: 1rem; padding: 12px 14px; border-radius: 10px; border: 2px solid #ddd;" />
         <button id="addPlayerBtn" onclick="addPlayer()">➕</button>
       </div>
-      <p id="playerError" style="color:#f44336; margin: -14px 0 14px 0; font-weight:500; font-size:0.9rem;"></p>
+      <p id="playerError" style="color:#D73230; margin: -14px 0 14px 0; font-weight:500; font-size:0.9rem;"></p>
 
       <div class="preset-grid" id="presetGrid"></div>
 
       <hr style="border:none; border-top:1px solid #eee; margin: 6px 0 16px 0;" />
-      <button class="btn btn-red" style="width:100%;" onclick="clearAll()">🗑️ Clear All</button>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-blue" style="flex:2;" onclick="closePresetModal()">💾 Opslaan</button>
+        <button class="btn btn-red" style="flex:1;" onclick="clearAll()">🔄 Nieuw spel</button>
+      </div>
     </div>
   </div>
 
@@ -370,6 +374,10 @@
 
   <h3 id="scoreHeader">📈 Scoreoverzicht</h3>
   <div id="scoreCards"></div>
+
+  <div style="margin: 12px 0;">
+    <button class="btn btn-blue" style="width:100%;" onclick="addAllPoints()">➕ Scores toevoegen</button>
+  </div>
 
   <div id="cloudBar">
     <button class="btn btn-green" onclick="openSaveModal()" type="button">💾 Opslaan</button>
@@ -452,8 +460,8 @@
   <!-- Clear All bevestiging -->
   <div id="clearAllModal" class="modal-background" onclick="cancelClearAll(event)">
     <div class="modal-content" style="padding: 25px; width: 90vw; max-width: 380px;" onclick="event.stopPropagation()">
-      <h3 style="margin: 0 0 12px 0;">🗑️ Clear All</h3>
-      <p style="margin: 0 0 20px 0; color: #555;">Weet je zeker dat je <strong>alle spelers en scores</strong> wilt verwijderen? Opgeslagen spellen in database blijven bestaan.</p>
+      <h3 style="margin: 0 0 12px 0;">🔄 Nieuw spel starten</h3>
+      <p style="margin: 0 0 20px 0; color: #555;">Weet je zeker dat je <strong>alle spelers en scores</strong> wilt verwijderen om een nieuw spel te starten? Opgeslagen spellen in de database blijven bestaan.</p>
       <div style="display: flex; gap: 10px;">
         <button class="btn btn-red" style="flex: 1;" onclick="clearAllConfirmed()">✔ Ja, verwijder alles</button>
         <button class="btn btn-grey" style="flex: 1;" onclick="cancelClearAll()">✕ Annuleren</button>
@@ -480,7 +488,7 @@
       <input type="text" id="editPlayerNameInput"
         style="width: 100%; font-size: 1.1rem; padding: 12px 14px; border-radius: 10px; border: 2px solid #ddd; margin-bottom: 20px;"
         autocomplete="off" />
-      <p id="editPlayerError" style="color:#f44336; margin: -12px 0 14px 0; font-weight: 500; font-size: 0.9rem;"></p>
+      <p id="editPlayerError" style="color:#D73230; margin: -12px 0 14px 0; font-weight: 500; font-size: 0.9rem;"></p>
       <div id="editMainButtons" style="display: flex; flex-direction: column; gap: 10px;">
         <div style="display: flex; gap: 10px;">
           <button class="btn btn-green" style="flex: 1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:10px;" onclick="savePlayerName()"><span>💾</span><span style="font-size:0.85rem;">Opslaan</span></button>
@@ -488,7 +496,7 @@
         </div>
       </div>
       <div id="editConfirmRow" style="display: none; flex-direction: column; gap: 10px;">
-        <p style="margin: 0 0 6px 0; font-weight: 500; color: #c0392b;">Zeker weten? Dit kan niet ongedaan worden gemaakt.</p>
+        <p style="margin: 0 0 6px 0; font-weight: 500; color: #D73230;">Zeker weten? Dit kan niet ongedaan worden gemaakt.</p>
         <div style="display: flex; gap: 10px;">
           <button class="btn btn-red" style="flex: 1;" onclick="deletePlayerConfirmed()">✔ Ja, verwijder</button>
           <button class="btn btn-grey" style="flex: 1;" onclick="cancelDelete()">✕ Annuleren</button>
@@ -632,6 +640,10 @@
     }
 
     async function saveAsNewGame() {
+      if (hasPendingRoundInput() && !addAllPoints()) {
+        toast('⚠️ Vul alle scores in (of maak ze leeg) om de lopende ronde te verwerken.', 'err');
+        return;
+      }
       const name = document.getElementById('saveNameInput').value.trim();
       const st = document.getElementById('saveStatus');
       st.textContent = 'Opslaan...';
@@ -646,6 +658,10 @@
 
     async function overwriteCurrentGame() {
       if (!currentGameId) return;
+      if (hasPendingRoundInput() && !addAllPoints()) {
+        toast('⚠️ Vul alle scores in (of maak ze leeg) om de lopende ronde te verwerken.', 'err');
+        return;
+      }
       const name = document.getElementById('saveNameInput').value.trim();
       const st = document.getElementById('saveStatus');
       st.textContent = 'Overschrijven...';
@@ -684,7 +700,7 @@
         renderGamesList();
       } catch (err) {
         document.getElementById('gamesSummary').innerHTML = '';
-        list.innerHTML = '<em style="color:#c0392b;">' + escapeHtml(err.message) + '</em>';
+        list.innerHTML = '<em style="color:#D73230;">' + escapeHtml(err.message) + '</em>';
       }
     }
 
@@ -773,7 +789,7 @@
         const r = await api({ action: 'stats' });
         renderStats(r.stats);
       } catch (err) {
-        tilesEl.innerHTML = '<em style="color:#c0392b;">' + escapeHtml(err.message) + '</em>';
+        tilesEl.innerHTML = '<em style="color:#D73230;">' + escapeHtml(err.message) + '</em>';
       }
     }
 
@@ -872,6 +888,10 @@
 
     async function overwriteGame(id) {
       if (!players.length) { toast('Geen spelers om op te slaan.', 'err'); return; }
+      if (hasPendingRoundInput() && !addAllPoints()) {
+        toast('⚠️ Vul alle scores in (of maak ze leeg) om de lopende ronde te verwerken.', 'err');
+        return;
+      }
       const pw = await askPassword('Overschrijven vereist het wachtwoord.');
       if (pw === null) return;
       try {
@@ -886,7 +906,7 @@
 
     async function deleteGame(id) {
       const g = gamesCache.find(x => x.id === id);
-      if (!confirm('Spel "' + (g ? g.name : id) + '" definitief verwijderen uit database?')) return;
+      if (!confirm('Spel "' + (g ? g.name : id) + '" definitief verwijderen uit de database?')) return;
       const pw = await askPassword('Verwijderen vereist het wachtwoord.');
       if (pw === null) return;
       try {
@@ -1057,7 +1077,7 @@
       renderCards();
       refreshPresetGrid();
       document.getElementById('clearAllModal').style.display = 'none';
-      document.getElementById('presetModal').style.display = 'none';
+      // Speler-modal blijft open zodat direct spelers voor het nieuwe spel toegevoegd kunnen worden.
     }
 
     function cancelClearAll(e) {
@@ -1065,10 +1085,7 @@
       document.getElementById('clearAllModal').style.display = 'none';
     }
 
-    function addAllPointsOnEnter(event) {
-      if (event.key !== 'Enter') return;
-      event.preventDefault();
-
+    function addAllPoints() {
       const missing = players.some((p, i) => {
         const inp = document.getElementById('pointsInput-' + i);
         if (!inp) return false;
@@ -1083,11 +1100,11 @@
           if (!inp) return;
           const val = inp.value.trim();
           if (!val || isNaN(parseInt(val, 10)) || parseInt(val, 10) < 0) {
-            inp.style.borderColor = '#f44336';
+            inp.style.borderColor = '#D73230';
             setTimeout(() => { inp.style.borderColor = ''; }, 1500);
           }
         });
-        return;
+        return false;
       }
 
       players.forEach((p, i) => {
@@ -1099,6 +1116,20 @@
       });
       savePlayers();
       renderCards();
+      return true;
+    }
+
+    function hasPendingRoundInput() {
+      return players.some((p, i) => {
+        const inp = document.getElementById('pointsInput-' + i);
+        return inp && inp.value.trim() !== '';
+      });
+    }
+
+    function addAllPointsOnEnter(event) {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      addAllPoints();
     }
 
     function openHistoryModal(index) {
@@ -1114,7 +1145,7 @@
           <input type="number" id="modalAddInput" min="0" placeholder="Score toevoegen..." style="flex:1; min-width:0; width:0; font-size:1rem; padding:10px 12px; border-radius:10px; border:2px solid #ddd; box-sizing:border-box;" />
           <button class="btn btn-green" style="padding:10px 14px; flex-shrink:0;" onclick="addHistoryFromModal()">➕</button>
         </div>
-        <p id="modalAddError" style="color:#f44336; margin:6px 0 0 0; font-size:0.9rem; font-weight:500;"></p>`;
+        <p id="modalAddError" style="color:#D73230; margin:6px 0 0 0; font-size:0.9rem; font-weight:500;"></p>`;
       document.getElementById('modalPlayerName').textContent = players[index].name;
       document.getElementById('modalAddInput').addEventListener('keydown', e => {
         if (e.key === 'Enter') { e.preventDefault(); addHistoryFromModal(); }
@@ -1155,8 +1186,8 @@
             <button class="remove-history-btn" title="Verwijder" onclick="askRemoveHistory(${pIdx},${hIdx})">✖</button>
           </div>
           <div id="histConfirm-${hIdx}" style="display:none; align-items:center; gap:6px;">
-            <span style="font-size:0.85rem; color:#c0392b; font-weight:500;">Verwijderen?</span>
-            <button class="edit-history-btn" title="Ja" onclick="removeHistoryPoint(${pIdx},${hIdx})" style="color:#1a7a3e;">✔</button>
+            <span style="font-size:0.85rem; color:#D73230; font-weight:500;">Verwijderen?</span>
+            <button class="edit-history-btn" title="Ja" onclick="removeHistoryPoint(${pIdx},${hIdx})" style="color:#008000;">✔</button>
             <button class="remove-history-btn" title="Nee" onclick="cancelRemoveHistory(${hIdx})">✖</button>
           </div>`;
         container.appendChild(div);
@@ -1183,7 +1214,7 @@
     function saveEditHistory(pIdx, hIdx) {
       const inp = document.getElementById(`histEditInput-${hIdx}`);
       const newVal = parseInt(inp.value, 10);
-      if (isNaN(newVal) || newVal < 0) { inp.style.borderColor = '#f44336'; return; }
+      if (isNaN(newVal) || newVal < 0) { inp.style.borderColor = '#D73230'; return; }
       players[pIdx].history[hIdx] = newVal;
       players[pIdx].points = players[pIdx].history.reduce((sum, v) => sum + v, 0);
       savePlayers();
