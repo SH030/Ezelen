@@ -220,10 +220,32 @@
     .summary-tile .v { font-size: 1.35rem; font-weight: 700; color: #0060AB; }
     .summary-tile .l { font-size: 0.78rem; color: #666; }
     .summary-tile small { font-size: 0.7rem; color: #888; }
+    .summary-tile .reason {
+      margin-top: 6px; padding-top: 6px; border-top: 1px dashed #d5dce5;
+      font-size: 0.72rem; line-height: 1.35; color: #5b6b7c; font-style: italic;
+    }
 
     #statsTable { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
     #statsTable th, #statsTable td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #eee; white-space: nowrap; }
     #statsTable th { color: #666; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; }
+    #statsTable th:first-child,
+    #statsTable td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      background: #fff;
+      font-weight: 600;
+      box-shadow: 2px 0 4px -2px rgba(0,0,0,0.2);
+    }
+    /* Eerste kolom (Speler) blijft zichtbaar bij horizontaal scrollen */
+    #statsTable th:first-child, #statsTable td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      background: #fff;
+      font-weight: 600;
+      box-shadow: 2px 0 4px rgba(0,0,0,0.08);
+    }
 
     .game-item {
       display: flex;
@@ -775,8 +797,9 @@
       });
     }
 
-    function statTile(label, valueHtml) {
-      return `<div class="summary-tile"><div class="v">${valueHtml}</div><div class="l">${label}</div></div>`;
+    function statTile(label, valueHtml, reason) {
+      return `<div class="summary-tile"><div class="v">${valueHtml}</div><div class="l">${label}</div>` +
+        (reason ? `<div class="reason">${reason}</div>` : '') + `</div>`;
     }
 
     async function loadStats() {
@@ -797,53 +820,71 @@
       const tableEl = document.getElementById('statsTable');
       if (!stats) { tilesEl.innerHTML = '<em>Nog geen data.</em>'; tableEl.innerHTML = ''; return; }
 
+      const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
       let tiles = '';
       if (stats.bestMargin) {
         tiles += statTile(
           `Grootste marge · ${stats.bestMargin.margin} pt<br><small>${escapeHtml(stats.bestMargin.gameName)} · ${escapeHtml(fmtDate(stats.bestMargin.date))}</small>`,
-          `🏆 ${escapeHtml(stats.bestMargin.winner)}<br>🐴 ${escapeHtml(stats.bestMargin.ezel)}`
+          `🏆 ${escapeHtml(stats.bestMargin.winner)}<br>🐴 ${escapeHtml(stats.bestMargin.ezel)}`,
+          `Waarom: in dit spel zat het grootste puntenverschil tussen de winnaar en de ezel (${stats.bestMargin.margin} pt).`
         );
       }
       if (stats.bestComeback) {
+        const c = stats.bestComeback;
         tiles += statTile(
-          `Grootste comeback<br><small>${escapeHtml(stats.bestComeback.gameName)} · ${escapeHtml(fmtDate(stats.bestComeback.date))}</small>`,
-          `${escapeHtml(stats.bestComeback.player)}<br><small>rang ${stats.bestComeback.halfwayRank} → ${stats.bestComeback.finalRank}</small>`
+          `Grootste comeback<br><small>${escapeHtml(c.gameName)} · ${escapeHtml(fmtDate(c.date))}</small>`,
+          `${escapeHtml(c.player)}<br><small>rang ${c.halfwayRank} → ${c.finalRank}</small>`,
+          `Waarom: ${escapeHtml(c.player)} klom ${plural(c.change, 'plaats', 'plaatsen')} tussen de helft van het spel en het einde. Dat is de grootste stijging ooit.`
         );
       }
       if (stats.worstDecline) {
+        const d = stats.worstDecline;
         tiles += statTile(
-          `Grootste inzinking<br><small>${escapeHtml(stats.worstDecline.gameName)} · ${escapeHtml(fmtDate(stats.worstDecline.date))}</small>`,
-          `${escapeHtml(stats.worstDecline.player)}<br><small>rang ${stats.worstDecline.halfwayRank} → ${stats.worstDecline.finalRank}</small>`
+          `Grootste inzinking<br><small>${escapeHtml(d.gameName)} · ${escapeHtml(fmtDate(d.date))}</small>`,
+          `${escapeHtml(d.player)}<br><small>rang ${d.halfwayRank} → ${d.finalRank}</small>`,
+          `Waarom: ${escapeHtml(d.player)} zakte ${plural(Math.abs(d.change), 'plaats', 'plaatsen')} tussen de helft van het spel en het einde. Dat is de grootste daling ooit.`
         );
       }
       if (stats.rivalry) {
         const rv = stats.rivalry;
+        const diffTxt = rv.diff === 0 ? 'precies gelijk' : 'een verschil van slechts ' + plural(rv.diff, 'overwinning', 'overwinningen');
         tiles += statTile(
           `Spannendste duel<br><small>${rv.count}x samen gespeeld${rv.ties ? ' · ' + rv.ties + 'x gelijk' : ''}</small>`,
-          `${escapeHtml(rv.a)} ${rv.aWins} - ${rv.bWins} ${escapeHtml(rv.b)}`
+          `${escapeHtml(rv.a)} ${rv.aWins} - ${rv.bWins} ${escapeHtml(rv.b)}`,
+          `Waarom: van alle koppels die minstens 3x samen speelden, is de onderlinge stand hier het gelijkst (${diffTxt}). Wie minder punten had, won.`
         );
       }
       if (stats.tightestGame) {
+        const t = stats.tightestGame;
         tiles += statTile(
-          `Spannendste spel · ${stats.tightestGame.gap} pt verschil<br><small>${escapeHtml(stats.tightestGame.gameName)} · ${escapeHtml(fmtDate(stats.tightestGame.date))}</small>`,
-          `🏆 ${escapeHtml(stats.tightestGame.winner)}`
+          `Spannendste spel · ${t.gap} pt verschil<br><small>${escapeHtml(t.gameName)} · ${escapeHtml(fmtDate(t.date))}</small>`,
+          t.gap === 0
+            ? `🤝 ${escapeHtml(t.winner)}<br><small>gelijk geëindigd</small>`
+            : `🏆 ${escapeHtml(t.winner)}<br><small>voor ${escapeHtml(t.second || '?')}</small>`,
+          `Waarom: in dit spel lagen de nummer 1 en 2 het dichtst bij elkaar (${t.gap} pt). Dat is het kleinste verschil ooit.`
         );
       }
       if (stats.longestGame) {
         tiles += statTile(
           `Langste spel<br><small>${escapeHtml(stats.longestGame.gameName)} · ${escapeHtml(fmtDate(stats.longestGame.date))}</small>`,
-          `🔁 ${stats.longestGame.rounds} rondes`
+          `🔁 ${stats.longestGame.rounds} rondes`,
+          `Waarom: dit spel had het meeste aantal rondes van alle opgeslagen spellen.`
         );
       }
       if (stats.leaderWinPct !== null && stats.leaderWinPct !== undefined) {
         tiles += statTile(
           `Leider na de helft wint<br><small>op ${stats.leaderTotal} spellen</small>`,
-          `${stats.leaderWinPct.toFixed(0)}%`
+          `${stats.leaderWinPct.toFixed(0)}%`,
+          `Uitleg: hoe vaak de speler die halverwege alleen aan de leiding stond (laagste score), het spel ook echt won. Spellen met een gedeelde leiding tellen niet mee.`
         );
       }
       const worst = (stats.players || []).slice().sort((a, b) => (b.worstRound || 0) - (a.worstRound || 0))[0];
       if (worst && worst.worstRound > 0) {
-        tiles += statTile('Slechtste ronde ooit', `🐴 ${escapeHtml(worst.name)}<br><small>${worst.worstRound} pt</small>`);
+        tiles += statTile(
+          'Slechtste ronde ooit',
+          `🐴 ${escapeHtml(worst.name)}<br><small>${worst.worstRound} pt</small>`,
+          `Waarom: de hoogste score in één enkele ronde, over alle spellen heen.`
+        );
       }
       tilesEl.innerHTML = tiles || '<em>Nog niet genoeg data voor deze statistieken.</em>';
 
