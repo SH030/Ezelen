@@ -192,6 +192,7 @@
     .btn-grey  { background-color: #7f8c9b; }
     .btn-orange{ background-color: #F69755; color: #0060AB; }
 
+    body.ro #scoreCards input { background: #eee; }
     #cloudBar {
       display: flex;
       gap: 10px;
@@ -220,10 +221,32 @@
     .summary-tile .v { font-size: 1.35rem; font-weight: 700; color: #0060AB; }
     .summary-tile .l { font-size: 0.78rem; color: #666; }
     .summary-tile small { font-size: 0.7rem; color: #888; }
+    .summary-tile .reason {
+      margin-top: 6px; padding-top: 6px; border-top: 1px dashed #d5dce5;
+      font-size: 0.72rem; line-height: 1.35; color: #5b6b7c; font-style: italic;
+    }
 
     #statsTable { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
     #statsTable th, #statsTable td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #eee; white-space: nowrap; }
     #statsTable th { color: #666; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; }
+    #statsTable th:first-child,
+    #statsTable td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      background: #fff;
+      font-weight: 600;
+      box-shadow: 2px 0 4px -2px rgba(0,0,0,0.2);
+    }
+    /* Eerste kolom (Speler) blijft zichtbaar bij horizontaal scrollen */
+    #statsTable th:first-child, #statsTable td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      background: #fff;
+      font-weight: 600;
+      box-shadow: 2px 0 4px rgba(0,0,0,0.08);
+    }
 
     .game-item {
       display: flex;
@@ -375,12 +398,14 @@
   <div id="scoreCards"></div>
 
   <div style="margin: 12px 0;">
-    <button class="btn btn-blue" style="width:100%;" onclick="addAllPoints()">➕ Scores toevoegen</button>
+    <button class="btn btn-blue" id="addScoresBtn" style="width:100%;" onclick="addAllPoints()">➕ Scores toevoegen</button>
   </div>
 
   <div id="cloudBar">
     <button class="btn btn-green" onclick="openSaveModal()" type="button">💾 Opslaan</button>
     <button class="btn btn-blue" onclick="openCloudModal()" type="button">🗂️ Spellen</button>
+    <button class="btn btn-red" id="closeGameBtn" onclick="closeGame()" type="button" style="display:none;">🔒 Afsluiten</button>
+    <button class="btn btn-blue" id="unlockBtn" onclick="unlockEdit()" type="button" style="display:none;">🔓 Bewerken</button>
     <div id="cloudState"></div>
   </div>
 
@@ -515,6 +540,8 @@
     let currentGameId = localStorage.getItem('ezelCurrentGameId') || null;
     let currentGameName = localStorage.getItem('ezelCurrentGameName') || '';
     let gamesCache = [];
+    let currentGameStatus = localStorage.getItem('ezelCurrentGameStatus') || '';
+    let editUnlocked = false;
 
     let players = [];
     let customNames = JSON.parse(localStorage.getItem('ezelCustomNames') || '[]');
@@ -610,11 +637,16 @@
       el.innerHTML = currentGameId
         ? 'Huidig spel: <b>' + escapeHtml(currentGameName || currentGameId) + '</b>'
         : 'Nog niet opgeslagen als spel.';
+      el.innerHTML += '<br>' + (isClosedLocked() ? SYNC_TXT.closed : (currentGameStatus === 'closed' && editUnlocked ? SYNC_TXT.unlocked : (SYNC_TXT[syncStatus] || '')));
     }
 
-    function setCurrentGame(id, name) {
+    function setCurrentGame(id, name, status) {
+      if ((id || null) !== currentGameId) editUnlocked = false;
       currentGameId = id || null;
       currentGameName = name || '';
+      if (!id) currentGameStatus = '';
+      else if (status !== undefined) currentGameStatus = status;
+      syncStatus = id ? 'live' : 'idle';
       if (id) {
         localStorage.setItem('ezelCurrentGameId', id);
         localStorage.setItem('ezelCurrentGameName', currentGameName);
@@ -622,7 +654,8 @@
         localStorage.removeItem('ezelCurrentGameId');
         localStorage.removeItem('ezelCurrentGameName');
       }
-      updateCloudState();
+      persistStatus();
+      applyEditState();
     }
 
     /* ═══════════ Opslaan ═══════════ */
@@ -648,7 +681,7 @@
       st.textContent = 'Opslaan...';
       try {
         const r = await api({ action: 'save', name: name, players: players });
-        setCurrentGame(r.id, name || fmtDate(r.datetime));
+        setCurrentGame(r.id, name || fmtDate(r.datetime), 'active');
         st.textContent = '';
         document.getElementById('saveModal').style.display = 'none';
         toast('✅ Opgeslagen op ' + fmtDate(r.datetime), 'ok');
@@ -657,6 +690,7 @@
 
     async function overwriteCurrentGame() {
       if (!currentGameId) return;
+      if (!ensureEditable()) return;
       if (hasPendingRoundInput() && !addAllPoints()) {
         toast('⚠️ Vul alle scores in (of maak ze leeg) om de lopende ronde te verwerken.', 'err');
         return;
@@ -665,8 +699,8 @@
       const st = document.getElementById('saveStatus');
       st.textContent = 'Overschrijven...';
       try {
-        // Het huidige, actieve spel overschrijven vereist geen wachtwoord.
-        await api({ action: 'update', id: currentGameId, name: name, players: players, skipAuth: true });
+        // Actief spel: geen wachtwoord nodig. Afgesloten (en ontgrendeld): wachtwoord wordt meegestuurd.
+        await api({ action: 'update', id: currentGameId, name: name, players: players, password: storedPw });
         setCurrentGame(currentGameId, name || currentGameName);
         st.textContent = '';
         document.getElementById('saveModal').style.display = 'none';
@@ -761,7 +795,7 @@
         div.className = 'game-item' + (g.id === currentGameId ? ' active' : '');
         div.innerHTML = `
           <div class="game-meta">
-            <span class="g-name">${escapeHtml(g.name)}</span>
+            <span class="g-name">${g.status === 'active' ? '🟢' : '🔒'} ${escapeHtml(g.name)}</span>
             <small>📅 ${escapeHtml(fmtDate(g.datetime))} · 👥 ${g.playerCount} · 🔁 ${g.rounds} rondes</small>
             <small>🏆 ${escapeHtml(g.winner)} · 🐴 ${escapeHtml(g.ezel)}</small>
           </div>
@@ -775,8 +809,9 @@
       });
     }
 
-    function statTile(label, valueHtml) {
-      return `<div class="summary-tile"><div class="v">${valueHtml}</div><div class="l">${label}</div></div>`;
+    function statTile(label, valueHtml, reason) {
+      return `<div class="summary-tile"><div class="v">${valueHtml}</div><div class="l">${label}</div>` +
+        (reason ? `<div class="reason">${reason}</div>` : '') + `</div>`;
     }
 
     async function loadStats() {
@@ -797,30 +832,70 @@
       const tableEl = document.getElementById('statsTable');
       if (!stats) { tilesEl.innerHTML = '<em>Nog geen data.</em>'; tableEl.innerHTML = ''; return; }
 
+      const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
       let tiles = '';
       if (stats.bestMargin) {
         tiles += statTile(
           `Grootste marge · ${stats.bestMargin.margin} pt<br><small>${escapeHtml(stats.bestMargin.gameName)} · ${escapeHtml(fmtDate(stats.bestMargin.date))}</small>`,
-          `🏆 ${escapeHtml(stats.bestMargin.winner)}<br>🐴 ${escapeHtml(stats.bestMargin.ezel)}`
+          `🏆 ${escapeHtml(stats.bestMargin.winner)}<br>🐴 ${escapeHtml(stats.bestMargin.ezel)}`,
+          `Waarom: in dit spel zat het grootste puntenverschil tussen de winnaar en de ezel (${stats.bestMargin.margin} pt).`
         );
       }
       if (stats.bestComeback) {
+        const c = stats.bestComeback;
         tiles += statTile(
-          `Grootste comeback<br><small>${escapeHtml(stats.bestComeback.gameName)} · ${escapeHtml(fmtDate(stats.bestComeback.date))}</small>`,
-          `${escapeHtml(stats.bestComeback.player)}<br><small>rang ${stats.bestComeback.halfwayRank} → ${stats.bestComeback.finalRank}</small>`
+          `Grootste comeback<br><small>${escapeHtml(c.gameName)} · ${escapeHtml(fmtDate(c.date))}</small>`,
+          `${escapeHtml(c.player)}<br><small>rang ${c.halfwayRank} → ${c.finalRank}</small>`,
+          `Waarom: ${escapeHtml(c.player)} klom ${plural(c.change, 'plaats', 'plaatsen')} tussen de helft van het spel en het einde. Dat is de grootste stijging ooit.`
         );
       }
       if (stats.worstDecline) {
+        const d = stats.worstDecline;
         tiles += statTile(
-          `Grootste inzinking<br><small>${escapeHtml(stats.worstDecline.gameName)} · ${escapeHtml(fmtDate(stats.worstDecline.date))}</small>`,
-          `${escapeHtml(stats.worstDecline.player)}<br><small>rang ${stats.worstDecline.halfwayRank} → ${stats.worstDecline.finalRank}</small>`
+          `Grootste inzinking<br><small>${escapeHtml(d.gameName)} · ${escapeHtml(fmtDate(d.date))}</small>`,
+          `${escapeHtml(d.player)}<br><small>rang ${d.halfwayRank} → ${d.finalRank}</small>`,
+          `Waarom: ${escapeHtml(d.player)} zakte ${plural(Math.abs(d.change), 'plaats', 'plaatsen')} tussen de helft van het spel en het einde. Dat is de grootste daling ooit.`
         );
       }
       if (stats.rivalry) {
         const rv = stats.rivalry;
+        const diffTxt = rv.diff === 0 ? 'precies gelijk' : 'een verschil van slechts ' + plural(rv.diff, 'overwinning', 'overwinningen');
         tiles += statTile(
-          `Grootste rivaliteit<br><small>${rv.count}x samen gespeeld${rv.ties ? ' · ' + rv.ties + 'x gelijk' : ''}</small>`,
-          `${escapeHtml(rv.a)} ${rv.aWins} - ${rv.bWins} ${escapeHtml(rv.b)}`
+          `Spannendste duel<br><small>${rv.count}x samen gespeeld${rv.ties ? ' · ' + rv.ties + 'x gelijk' : ''}</small>`,
+          `${escapeHtml(rv.a)} ${rv.aWins} - ${rv.bWins} ${escapeHtml(rv.b)}`,
+          `Waarom: van alle koppels die minstens 3x samen speelden, is de onderlinge stand hier het gelijkst (${diffTxt}). Wie minder punten had, won.`
+        );
+      }
+      if (stats.tightestGame) {
+        const t = stats.tightestGame;
+        tiles += statTile(
+          `Spannendste spel · ${t.gap} pt verschil<br><small>${escapeHtml(t.gameName)} · ${escapeHtml(fmtDate(t.date))}</small>`,
+          t.gap === 0
+            ? `🤝 ${escapeHtml(t.winner)}<br><small>gelijk geëindigd</small>`
+            : `🏆 ${escapeHtml(t.winner)}<br><small>voor ${escapeHtml(t.second || '?')}</small>`,
+          `Waarom: in dit spel lagen de nummer 1 en 2 het dichtst bij elkaar (${t.gap} pt). Dat is het kleinste verschil ooit.`
+        );
+      }
+      if (stats.longestGame) {
+        tiles += statTile(
+          `Langste spel<br><small>${escapeHtml(stats.longestGame.gameName)} · ${escapeHtml(fmtDate(stats.longestGame.date))}</small>`,
+          `🔁 ${stats.longestGame.rounds} rondes`,
+          `Waarom: dit spel had het meeste aantal rondes van alle opgeslagen spellen.`
+        );
+      }
+      if (stats.leaderWinPct !== null && stats.leaderWinPct !== undefined) {
+        tiles += statTile(
+          `Leider na de helft wint<br><small>op ${stats.leaderTotal} spellen</small>`,
+          `${stats.leaderWinPct.toFixed(0)}%`,
+          `Uitleg: hoe vaak de speler die halverwege alleen aan de leiding stond (laagste score), het spel ook echt won. Spellen met een gedeelde leiding tellen niet mee.`
+        );
+      }
+      const worst = (stats.players || []).slice().sort((a, b) => (b.worstRound || 0) - (a.worstRound || 0))[0];
+      if (worst && worst.worstRound > 0) {
+        tiles += statTile(
+          'Slechtste ronde ooit',
+          `🐴 ${escapeHtml(worst.name)}<br><small>${worst.worstRound} pt</small>`,
+          `Waarom: de hoogste score in één enkele ronde, over alle spellen heen.`
         );
       }
       tilesEl.innerHTML = tiles || '<em>Nog niet genoeg data voor deze statistieken.</em>';
@@ -829,6 +904,7 @@
       let html = `<tr>
         <th>Speler</th><th>Spellen</th><th>Gem. pt/ronde</th>
         <th>Win%</th><th>Ezel%</th><th>Beste winreeks</th><th>Beste ezelreeks</th><th>Trend</th>
+        <th>Rondewin%</th><th>Nulrondes%</th><th>Slechtste ronde</th><th>Wisselvalligheid</th>
       </tr>`;
       rows.forEach(p => {
         const trendIcon = p.trend === 'verbetert' ? '📈' : (p.trend === 'verslechtert' ? '📉' : '➖');
@@ -841,6 +917,10 @@
           <td>${p.bestWinStreak}</td>
           <td>${p.bestEzelStreak}</td>
           <td>${trendIcon} ${p.trend}</td>
+          <td>${(p.roundWinPct ?? 0).toFixed(0)}%</td>
+          <td>${(p.zeroPct ?? 0).toFixed(0)}%</td>
+          <td>${p.worstRound ?? '-'}</td>
+          <td>${p.volatility !== null && p.volatility !== undefined ? p.volatility.toFixed(1) : '-'}</td>
         </tr>`;
       });
       tableEl.innerHTML = html;
@@ -848,11 +928,9 @@
 
     async function loadGame(id) {
       if (players.length && !confirm('Huidige stand vervangen door dit opgeslagen spel?')) return;
-      const pw = await askPassword('Een historisch spel laden vereist het wachtwoord.');
-      if (pw === null) return;
       try {
-        const r = await api({ action: 'get', id: id, password: pw });
-        rememberPw(pw);
+        // Bekijken/laden kan zonder wachtwoord.
+        const r = await api({ action: 'get', id: id });
         players = (r.game.players || []).map((p, i) => ({
           name: p.name,
           points: (p.history || []).reduce((s, v) => s + v, 0),
@@ -861,12 +939,12 @@
         }));
         insertionCount = players.reduce((max, p) => Math.max(max, p.insertionIndex ?? 0), -1) + 1;
         players.forEach(p => addCustomName(p.name));
-        savePlayers();
+        try { localStorage.setItem('ezelplayers', JSON.stringify(players)); } catch (e) {}
+        setCurrentGame(r.game.id, r.game.name, r.game.status);
         renderCards();
-        setCurrentGame(r.game.id, r.game.name);
         renderGamesList();
         document.getElementById('cloudModal').style.display = 'none';
-        toast('📥 Spel geladen.', 'ok');
+        toast(r.game.status === 'closed' ? '📥 Spel geladen (afgesloten – alleen lezen).' : '📥 Spel geladen.', 'ok');
       } catch (err) { handleApiError(err); }
     }
 
@@ -874,11 +952,15 @@
       const g = gamesCache.find(x => x.id === id);
       const newName = prompt('Nieuwe naam:', g ? g.name : '');
       if (newName === null || !newName.trim()) return;
-      const pw = await askPassword('Hernoemen vereist het wachtwoord.');
-      if (pw === null) return;
+      const closed = !g || g.status !== 'active';
+      let pw;
+      if (closed) {
+        pw = await askPassword('Hernoemen van een afgesloten spel vereist het wachtwoord.');
+        if (pw === null) return;
+      }
       try {
         await api({ action: 'update', id: id, name: newName.trim(), password: pw });
-        rememberPw(pw);
+        if (closed) rememberPw(pw);
         if (id === currentGameId) setCurrentGame(id, newName.trim());
         await loadGamesList();
         toast('✅ Hernoemd.', 'ok');
@@ -891,13 +973,19 @@
         toast('⚠️ Vul alle scores in (of maak ze leeg) om de lopende ronde te verwerken.', 'err');
         return;
       }
-      const pw = await askPassword('Overschrijven vereist het wachtwoord.');
-      if (pw === null) return;
+      const g = gamesCache.find(x => x.id === id);
+      const closed = !g || g.status !== 'active';
+      let pw;
+      if (closed) {
+        pw = await askPassword('Een afgesloten spel overschrijven vereist het wachtwoord.');
+        if (pw === null) return;
+      }
       try {
-        await api({ action: 'update', id: id, players: players, password: pw });
-        rememberPw(pw);
-        const g = gamesCache.find(x => x.id === id);
-        setCurrentGame(id, g ? g.name : currentGameName);
+        await api({ action: 'update', id: id, players: playersSnapshot(), password: pw });
+        if (closed) rememberPw(pw);
+        setCurrentGame(id, g ? g.name : currentGameName, g ? g.status : undefined);
+        if (closed) editUnlocked = true;
+        applyEditState();
         await loadGamesList();
         toast('✅ Overschreven met huidige stand.', 'ok');
       } catch (err) { handleApiError(err); }
@@ -944,6 +1032,7 @@
         btn.textContent = name;
         btn.disabled = alreadyAdded;
         btn.onclick = () => {
+          if (!ensureEditable()) return;
           players.push({ name, points: 0, history: [], insertionIndex: insertionCount++ });
           savePlayers();
           renderCards();
@@ -972,10 +1061,195 @@
       }
       renderCards();
       updateCloudState();
+      initSync();
     };
 
+    /* ═══════════ Live sync (via Apps Script, polling) ═══════════ */
+    const POLL_MS = 5000;
+    let syncStatus = 'idle', pushTimer = null, pushing = false, pushAgain = false;
+    let lastLocalEdit = 0;
+    let lastSort = { c: 'original', asc: true };
+    const SYNC_TXT = {
+      idle: '⚪ Sla het spel op (💾) om het live te delen',
+      live: '🟢 Actief spel – live gedeeld (ververst elke 5 s)',
+      syncing: '🟡 Synchroniseren…',
+      offline: '🔴 Geen verbinding – wijziging wordt opnieuw geprobeerd',
+      closed: '🔒 Afgesloten spel – alleen lezen. Tik op 🔓 Bewerken (wachtwoord) om te wijzigen.',
+      unlocked: '🔓 Afgesloten spel – bewerken ontgrendeld'
+    };
+    function setSyncStatus(st) { syncStatus = st; updateCloudState(); }
+    function persistStatus() {
+      try {
+        if (currentGameId && currentGameStatus) localStorage.setItem('ezelCurrentGameStatus', currentGameStatus);
+        else localStorage.removeItem('ezelCurrentGameStatus');
+      } catch (e) {}
+    }
+
+    /* — bewerken toegestaan? — */
+    function isClosedLocked() { return !!currentGameId && currentGameStatus === 'closed' && !editUnlocked; }
+    function ensureEditable() {
+      if (!isClosedLocked()) return true;
+      toast('🔒 Afgesloten spel – alleen lezen. Tik op 🔓 Bewerken en voer het wachtwoord in.', 'err');
+      return false;
+    }
+    function applyEditState() {
+      const ro = isClosedLocked();
+      document.body.classList.toggle('ro', ro);
+      document.querySelectorAll('#scoreCards input').forEach(i => { i.disabled = ro; });
+      const addBtn = document.getElementById('addScoresBtn');
+      if (addBtn) addBtn.disabled = ro;
+      const closeBtn = document.getElementById('closeGameBtn');
+      if (closeBtn) closeBtn.style.display = (currentGameId && currentGameStatus !== 'closed') ? '' : 'none';
+      const unlockBtn = document.getElementById('unlockBtn');
+      if (unlockBtn) unlockBtn.style.display = ro ? '' : 'none';
+      updateCloudState();
+    }
+    async function unlockEdit() {
+      const pw = await askPassword('Een afgesloten spel bewerken vereist het wachtwoord.');
+      if (pw === null) return;
+      try {
+        await api({ action: 'verify', password: pw });
+        rememberPw(pw);
+        editUnlocked = true;
+        applyEditState();
+        toast('🔓 Bewerken ontgrendeld voor dit spel.', 'ok');
+      } catch (err) { handleApiError(err); }
+    }
+    async function flushPush() {
+      clearTimeout(pushTimer); pushTimer = null;
+      while (pushing) await new Promise(r => setTimeout(r, 200));
+      await pushState();
+    }
+    async function closeGame() {
+      if (!currentGameId) return;
+      if (!confirm('Spel afsluiten? Daarna is het voor iedereen alleen-lezen en kan het enkel nog met het wachtwoord bewerkt worden.')) return;
+      if (hasPendingRoundInput() && !addAllPoints()) {
+        toast('⚠️ Vul alle scores in (of maak ze leeg) om de lopende ronde te verwerken.', 'err');
+        return;
+      }
+      try {
+        await flushPush();
+        await api({ action: 'close', id: currentGameId });
+        currentGameStatus = 'closed';
+        editUnlocked = false;
+        persistStatus();
+        applyEditState();
+        toast('🔒 Spel afgesloten.', 'ok');
+      } catch (err) { handleApiError(err); }
+    }
+
+    /* — sorteren / snapshot — */
+    function applySort() {
+      if (lastSort.c === 'score') players.sort((a, b) => lastSort.asc ? a.points - b.points : b.points - a.points);
+      else if (lastSort.c === 'name') players.sort((a, b) => a.name.localeCompare(b.name));
+      else players.sort((a, b) => (a.insertionIndex ?? 0) - (b.insertionIndex ?? 0));
+    }
+    function playersSnapshot() {
+      return players.slice().sort((a, b) => (a.insertionIndex ?? 0) - (b.insertionIndex ?? 0))
+        .map(p => ({ name: p.name, history: p.history.slice(), insertionIndex: p.insertionIndex ?? 0 }));
+    }
+
+    /* — wegschrijven — */
     function savePlayers() {
       localStorage.setItem('ezelplayers', JSON.stringify(players));
+      lastLocalEdit = Date.now();
+      schedulePush();
+    }
+    function schedulePush() {
+      if (!currentGameId) { setSyncStatus('idle'); return; }
+      if (isClosedLocked()) return;
+      clearTimeout(pushTimer);
+      pushTimer = setTimeout(() => { pushTimer = null; pushState(); }, 700);
+    }
+    async function pushState() {
+      if (!currentGameId || isClosedLocked()) return;
+      if (pushing) { pushAgain = true; return; }
+      pushing = true;
+      try {
+        do {
+          pushAgain = false;
+          setSyncStatus('syncing');
+          await api({ action: 'update', id: currentGameId, players: playersSnapshot(), password: storedPw });
+        } while (pushAgain);
+        setSyncStatus('live');
+      } catch (e) {
+        if (String(e.message || e).toLowerCase().indexOf('wachtwoord') !== -1) {
+          // Spel is intussen afgesloten (of wachtwoord ongeldig geworden).
+          pushAgain = false;
+          currentGameStatus = 'closed'; editUnlocked = false; persistStatus();
+          applyEditState();
+          toast('🔒 Dit spel is afgesloten – alleen lezen.', 'err');
+        } else {
+          setSyncStatus('offline');
+          pushTimer = setTimeout(() => { pushTimer = null; pushState(); }, 5000);
+        }
+      } finally { pushing = false; }
+    }
+
+    /* — ophalen — */
+    function applyRemote(game) {
+      if (game.status && game.status !== currentGameStatus) {
+        currentGameStatus = game.status;
+        persistStatus();
+        applyEditState();
+      }
+      const remote = (game.players || []).map((p, i) => ({
+        name: p.name, history: (p.history || []).slice(),
+        insertionIndex: typeof p.insertionIndex === 'number' ? p.insertionIndex : i
+      }));
+      if (JSON.stringify(remote) === JSON.stringify(playersSnapshot())) return;
+
+      const typed = {};
+      players.forEach((p, i) => {
+        const el = document.getElementById('pointsInput-' + i);
+        if (el && el.value !== '') typed[p.name] = el.value;
+      });
+      const ae = document.activeElement;
+      const focusName = (ae && ae.id && ae.id.indexOf('pointsInput-') === 0 && players[+ae.id.split('-')[1]])
+        ? players[+ae.id.split('-')[1]].name : null;
+
+      players = remote.map(p => ({ ...p, points: p.history.reduce((s, v) => s + v, 0) }));
+      insertionCount = players.reduce((m, p) => Math.max(m, p.insertionIndex ?? 0), -1) + 1;
+      players.forEach(p => addCustomName(p.name));
+      applySort();
+      try { localStorage.setItem('ezelplayers', JSON.stringify(players)); } catch (e) {}
+      if (game.name && game.name !== currentGameName) setCurrentGame(currentGameId, game.name);
+      renderCards();
+
+      players.forEach((p, i) => {
+        const el = document.getElementById('pointsInput-' + i);
+        if (el && typed[p.name] !== undefined) el.value = typed[p.name];
+        if (el && p.name === focusName) el.focus({ preventScroll: true });
+      });
+      if (modalOpenForIndex !== null) {
+        if (players[modalOpenForIndex] && document.getElementById('modalHistoryContainer')) {
+          if (!document.querySelector('#modalHistoryContainer input')) renderHistoryItems(modalOpenForIndex);
+        } else { closeHistoryModal(); }
+      }
+      refreshPresetGrid();
+    }
+
+    async function pollOnce() {
+      if (!currentGameId || pushing || pushTimer || document.hidden) return;
+      if (Date.now() - lastLocalEdit < 3000) return;
+      try {
+        const r = await api({ action: 'get', id: currentGameId });   // zonder wachtwoord
+        if (pushing || pushTimer || Date.now() - lastLocalEdit < 3000) return;
+        applyRemote(r.game);
+        setSyncStatus('live');
+      } catch (e) {
+        if (String(e.message || e).toLowerCase().indexOf('niet gevonden') !== -1) {
+          setCurrentGame(null, '');
+          toast('Dit spel bestaat niet meer.', 'err');
+        } else setSyncStatus('offline');
+      }
+    }
+    function initSync() {
+      setSyncStatus(currentGameId ? 'live' : 'idle');
+      applyEditState();
+      setInterval(pollOnce, POLL_MS);
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) pollOnce(); });
+      pollOnce();
     }
 
     function addPlayer() { addPlayerLogic(); }
@@ -996,6 +1270,7 @@
     });
 
     function addPlayerLogic() {
+      if (!ensureEditable()) return;
       const input = document.getElementById('playerNameInput');
       const errorMsg = document.getElementById('playerError');
       const name = input.value.trim();
@@ -1029,6 +1304,7 @@
     }
 
     function savePlayerName() {
+      if (!ensureEditable()) return;
       const input = document.getElementById('editPlayerNameInput');
       const errorMsg = document.getElementById('editPlayerError');
       const newName = input.value.trim();
@@ -1050,6 +1326,7 @@
     }
 
     function deletePlayerConfirmed() {
+      if (!ensureEditable()) return;
       players.splice(editPlayerIndex, 1);
       savePlayers();
       renderCards();
@@ -1085,6 +1362,7 @@
     }
 
     function addAllPoints() {
+      if (!ensureEditable()) return false;
       const missing = players.some((p, i) => {
         const inp = document.getElementById('pointsInput-' + i);
         if (!inp) return false;
@@ -1194,6 +1472,7 @@
     }
 
     function startEditHistory(pIdx, hIdx) {
+      if (!ensureEditable()) return;
       const label = document.getElementById(`histLabel-${hIdx}`);
       const currentVal = players[pIdx].history[hIdx];
       label.outerHTML = `
@@ -1211,6 +1490,7 @@
     }
 
     function saveEditHistory(pIdx, hIdx) {
+      if (!ensureEditable()) return;
       const inp = document.getElementById(`histEditInput-${hIdx}`);
       const newVal = parseInt(inp.value, 10);
       if (isNaN(newVal) || newVal < 0) { inp.style.borderColor = '#D73230'; return; }
@@ -1228,6 +1508,7 @@
     }
 
     function askRemoveHistory(pIdx, hIdx) {
+      if (!ensureEditable()) return;
       document.getElementById(`histActions-${hIdx}`).style.display = 'none';
       document.getElementById(`histConfirm-${hIdx}`).style.display = 'flex';
     }
@@ -1238,6 +1519,7 @@
     }
 
     function removeHistoryPoint(pIdx, hIdx) {
+      if (!ensureEditable()) return;
       players[pIdx].history.splice(hIdx, 1);
       players[pIdx].points = players[pIdx].history.reduce((sum, v) => sum + v, 0);
       savePlayers();
@@ -1286,7 +1568,7 @@
                 ${p.points} (${p.history.length})
               </span>
               <div class="player-input-row">
-                <input type="number" id="pointsInput-${i}" min="0" placeholder="0" />
+                <input type="number" id="pointsInput-${i}" min="0" placeholder="0" ${isClosedLocked() ? 'disabled' : ''} />
               </div>
             </div>
           </div>
@@ -1302,6 +1584,7 @@
     }
 
     function sortPlayers(criteria) {
+      lastSort = { c: criteria, asc: scoreSortAsc };
       const scoreBtn = document.querySelector('#sortControls .btn[data-sort="score"]');
       if (criteria === 'score') {
         players.sort((a, b) => scoreSortAsc ? a.points - b.points : b.points - a.points);
@@ -1330,4 +1613,3 @@
   </script>
 </body>
 </html>
- 
